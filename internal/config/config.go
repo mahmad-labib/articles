@@ -8,6 +8,7 @@ import (
 
 type Config struct {
 	Server Server
+	DB     DB
 }
 
 func New(path string) (*Config, error) {
@@ -17,5 +18,6 @@ func New(path string) (*Config, error) {
 
 	return &Config{
 		Server: ServerValues(),
+		DB:     CreateDSN(),
 	}, nil
 }

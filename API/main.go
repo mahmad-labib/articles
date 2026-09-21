@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"log/slog"
 	"net/http"
 	"os"
@@ -14,6 +15,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"main.go/internal/config"
+	"main.go/internal/infra/db"
 )
 
 func main() {
@@ -24,6 +26,13 @@ func main() {
 
 		os.Exit(1)
 	}
+
+	db, err := db.NewClient(cfg.DB.DSN)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
