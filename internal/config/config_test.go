@@ -5,9 +5,8 @@ import (
 	"testing"
 )
 
-func TestConfig_ENV(t *testing.T) {
+func TestConfig_Server(t *testing.T) {
 	envPath := filepath.Join("..", "..", ".env")
-
 	cfg, err := New(envPath)
 	if err != nil {
 		t.Fatalf("expected no error got %v", err)
@@ -25,4 +24,15 @@ func TestConfig_ENV(t *testing.T) {
 		t.Fatalf("expected WriteTimeout got nil")
 	}
 
+}
+
+func TestConfig_DB(t *testing.T) {
+	envPath := filepath.Join("..", "..", ".env")
+	cfg, err := New(envPath)
+	if err != nil {
+		t.Fatalf("expected no error got %v", err)
+	}
+	if cfg.DB.DSN == "" {
+		t.Fatalf("expected DSN got nil")
+	}
 }

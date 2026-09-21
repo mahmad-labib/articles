@@ -1,21 +1,21 @@
 package config
 
 import (
-	"log/slog"
-
 	"github.com/joho/godotenv"
 )
 
 type Config struct {
 	Server Server
+	DB     DB
 }
 
 func New(path string) (*Config, error) {
 	if err := godotenv.Load(path); err != nil {
-		slog.Warn("No .env file found, will use default values")
+		return &Config{}, err
 	}
 
 	return &Config{
 		Server: ServerValues(),
+		DB:     CreateDSN(),
 	}, nil
 }
