@@ -5,10 +5,10 @@ import (
 	"gorm.io/gorm"
 )
 
-type ArticleDB struct {
+type Core struct {
 	db *gorm.DB
 }
 
-func NewArticlesDB(db *gorm.DB) *ArticleDB {
-	return &ArticleDB{db: db}
+func NewArticlesDB(db *gorm.DB) *Core {
+	return &Core{db: db}
 }
