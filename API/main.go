@@ -15,7 +15,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"main.go/internal/config"
-	"main.go/internal/infra/db"
+	db "main.go/internal/infra/db/repo"
 )
 
 func main() {
