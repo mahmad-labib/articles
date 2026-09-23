@@ -121,7 +121,12 @@ func (C *Core) DeleteArticle(ctx context.Context, id int64) error {
 
 func (C *Core) ListArticles(ctx context.Context, Page, PageSize int) ([]domain.Article, error) {
 	var Articles []APIArticle
-	err := C.db.Scopes(Paginate(Page, PageSize)).Preload("Tags").Find(&Articles).Error
+	err := C.db.
+		Scopes(Paginate(Page, PageSize)).
+		Preload("Tags").
+		Preload("Category").
+		Preload("Author").
+		Find(&Articles).Error
 	if err != nil {
 		return nil, err
 	}
@@ -144,6 +149,10 @@ func (C *Core) ListArticles(ctx context.Context, Page, PageSize int) ([]domain.A
 			Category: domain.Category{
 				ID:   a.Category.ID,
 				Name: a.Category.Name,
+			},
+			Author: domain.User{
+				ID:   a.Author.ID,
+				Name: a.Author.Name,
 			},
 		}
 		articles = append(articles, article)
