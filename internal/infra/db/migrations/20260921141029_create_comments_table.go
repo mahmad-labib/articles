@@ -20,7 +20,7 @@ func upCreateCommentsTable(ctx context.Context, tx *sql.Tx) error {
             body TEXT NOT NULL,
             created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
-            FOREIGN KEY (article_id) REFERENCES articles(id),
+            FOREIGN KEY (article_id) REFERENCES articles(id) ON DELETE CASCADE,
             FOREIGN KEY (author_id) REFERENCES users(id)
         )
     `)

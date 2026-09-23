@@ -80,25 +80,7 @@ func (C *Core) ListUser(ctx context.Context, Page, PageSize int) ([]domain.User,
 	return list, nil
 }
 
-func Paginate(page, PageSize int) func(db *gorm.DB) *gorm.DB {
-	return func(db *gorm.DB) *gorm.DB {
-		if page <= 0 {
-			page = 1
-		}
-
-		switch {
-		case PageSize > 100:
-			PageSize = 100
-		case PageSize <= 0:
-			PageSize = 10
-		}
-
-		offset := (page - 1) * PageSize
-		return db.Offset(offset).Limit(PageSize)
-	}
-}
-
-func (C *Core) DeleteUser(ctx context.Context, id int) error {
+func (C *Core) DeleteUser(ctx context.Context, id int64) error {
 	res := C.db.Delete(&models.User{}, id)
 	if res.Error != nil {
 		return res.Error

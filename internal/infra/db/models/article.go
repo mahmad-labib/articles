@@ -1,5 +1,7 @@
 package models
 
+import "gorm.io/gorm"
+
 type Article struct {
 	ID         int64
 	Title      string
@@ -8,6 +10,7 @@ type Article struct {
 	Status     string
 	AuthorID   int64
 	CategoryID int64
+	DeletedAt  gorm.DeletedAt
 
 	Author   User
 	Category Category
