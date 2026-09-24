@@ -1,6 +1,6 @@
 package domain
 
 type Tag struct {
-	ID   uint   `json:"id"`
+	ID   int64  `json:"id"`
 	Name string `json:"name"`
 }

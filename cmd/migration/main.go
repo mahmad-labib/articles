@@ -10,8 +10,8 @@ import (
 
 	"github.com/pressly/goose/v3"
 	"main.go/internal/config"
-	"main.go/internal/infra/db"
 	_ "main.go/internal/infra/db/migrations"
+	db "main.go/internal/infra/db/repo"
 )
 
 func main() {

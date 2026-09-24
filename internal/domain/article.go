@@ -20,4 +20,9 @@ type Article struct {
 	CategoryID  int64
 	PublishedAt *time.Time
 	CreatedAt   time.Time
+
+	Comments []Comment
+	Tags     []Tag
+	Category Category
+	Author   User
 }

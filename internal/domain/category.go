@@ -4,4 +4,6 @@ type Category struct {
 	ID   int64  `json:"id"`
 	Slug string `json:"slug"`
 	Name string `json:"name"`
+
+	Articles []Article `json:"articles"`
 }
