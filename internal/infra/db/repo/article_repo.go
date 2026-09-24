@@ -1,4 +1,4 @@
-package db
+package repo
 
 import (
 	"context"
@@ -19,7 +19,7 @@ type APIArticle struct {
 
 func (C *Core) CreateArticle(ctx context.Context, article domain.Article, userId int64, catId int64, tags []domain.Tag) error {
 	Article := models.Article{
-		AuthorID:   userId,
+		UserID:     userId,
 		CategoryID: catId,
 		Title:      article.Title,
 		Slug:       article.Slug,
@@ -58,7 +58,7 @@ func (C *Core) GetArticleByID(ctx context.Context, id int64) (*domain.Article, e
 		comments = append(comments, domain.Comment{
 			ID:        comment.ID,
 			ArticleID: comment.ArticleID,
-			AuthorID:  comment.AuthorID,
+			AuthorID:  comment.UserID,
 			Body:      comment.Body,
 			CreatedAt: comment.CreatedAt,
 		})
@@ -150,7 +150,7 @@ func (C *Core) ListArticles(ctx context.Context, Page, PageSize int) ([]domain.A
 				ID:   a.Category.ID,
 				Name: a.Category.Name,
 			},
-			Author: domain.User{
+			Author: domain.ApiUser{
 				ID:   a.Author.ID,
 				Name: a.Author.Name,
 			},

@@ -8,11 +8,11 @@ type Article struct {
 	Slug       string
 	Body       string
 	Status     string
-	AuthorID   int64
+	UserID     int64
 	CategoryID int64
 	DeletedAt  gorm.DeletedAt
 
-	Author   User
+	User     User
 	Category Category
 	Comments []Comment
 	Tags     []Tag `gorm:"many2many:article_tags;"`

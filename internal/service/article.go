@@ -21,10 +21,11 @@ type ArticlesRepository interface {
 	CreateComment(ctx context.Context, comment domain.Comment, userId int64, articleId int64) error
 	DeleteComment(ctx context.Context, commentId int64) error
 	CreateUser(ctx context.Context, domUser *domain.User) (int64, error)
-	GetUserByID(ctx context.Context, ID int64) (*domain.User, error)
-	UpdateUser(ctx context.Context, domUser *domain.User) error
-	ListUser(ctx context.Context, Page, PageSize int) ([]domain.User, error)
+	GetUserByID(ctx context.Context, ID int64) (*domain.ApiUser, error)
+	UpdateUser(ctx context.Context, domUser *domain.ApiUser) error
+	ListUser(ctx context.Context, Page, PageSize int) ([]domain.ApiUser, error)
 	DeleteUser(ctx context.Context, ID int64) error
+	GetUserByEmail(ctx context.Context, Email string) (*domain.ApiUser, error)
 }
 
 type ArticleService struct {

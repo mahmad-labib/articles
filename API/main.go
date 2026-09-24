@@ -14,8 +14,11 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"main.go/API/router"
 	"main.go/internal/config"
+	"main.go/internal/infra/db/repo"
 	db "main.go/internal/infra/db/repo"
+	"main.go/internal/service"
 )
 
 func main() {
@@ -40,6 +43,11 @@ func main() {
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
+
+	repository := repo.NewArticlesDB(db)
+	service := service.NewArticleService(repository)
+	r.Mount("/", router.NewArticlesRouter(service))
+
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Hello World!"))
 	})
