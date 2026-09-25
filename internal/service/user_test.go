@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"log"
 	"testing"
 
@@ -15,7 +16,7 @@ import (
 	"main.go/internal/infra/db/repo"
 )
 
-func Test_User(t *testing.T) {
+func createTestDB(t *testing.T) (*sql.DB, *gorm.DB) {
 	admin, err := gorm.Open(postgres.Open("postgres://postgres:123@localhost:5432/postgres?sslmode=disable"), &gorm.Config{})
 	if err != nil {
 		t.Fatal(err)
@@ -43,6 +44,11 @@ func Test_User(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	return adminDB, test
+}
+func Test_User(t *testing.T) {
+	adminDB, test := createTestDB(t)
 
 	testDB, err := test.DB()
 	if err != nil {
@@ -110,6 +116,117 @@ func Test_User(t *testing.T) {
 	err = service.DeleteUser(ctx, id)
 	if err != nil {
 		t.Fatalf("expected no error got err: %v", err)
+	}
+
+	t.Cleanup(func() {
+		testDB.Close()
+
+		_, err := adminDB.Exec(`DROP DATABASE test_db`)
+		if err != nil {
+			t.Fatalf("failed to drop test database: %v", err)
+		}
+
+		adminDB.Close()
+	})
+}
+
+func Test_User_InvalidValues(t *testing.T) {
+	adminDB, test := createTestDB(t)
+
+	testDB, err := test.DB()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := goose.Up(testDB, "../infra/db/migrations"); err != nil {
+		log.Fatal(err)
+	}
+
+	if !test.Migrator().HasTable("users") {
+		t.Fatal("expected users table got nil")
+	}
+	if !test.Migrator().HasTable("articles") {
+		t.Fatal("expected articles table got nil")
+	}
+	if !test.Migrator().HasTable("categories") {
+		t.Fatal("expected categories table got nil")
+	}
+	if !test.Migrator().HasTable("comments") {
+		t.Fatal("expected comments table got nil")
+	}
+	if !test.Migrator().HasTable("tags") {
+		t.Fatal("expected tags table got nil")
+	}
+	if !test.Migrator().HasTable("article_tags") {
+		t.Fatal("expected article_tags table got nil")
+	}
+
+	repository := repo.NewArticlesDB(test)
+	service := NewArticleService(repository)
+
+	ctx := context.Background()
+
+	user1 := domain.User{
+		Name:     "",
+		Email:    "user@email.com",
+		Password: "12345",
+	}
+
+	id, err := service.CreateUser(ctx, &user1)
+	if err == nil {
+		t.Fatalf("expected err got nil")
+	}
+	if id > 0 {
+		t.Fatalf("expected no id got %v", id)
+	}
+
+	user2 := domain.User{
+		Name:     "name",
+		Email:    "",
+		Password: "12345",
+	}
+
+	id, err = service.CreateUser(ctx, &user2)
+	if err == nil {
+		t.Fatalf("expected err got nil")
+	}
+	if id > 0 {
+		t.Fatalf("expected no id got %v", id)
+	}
+
+	user3 := domain.User{
+		Name:     "name",
+		Email:    "user@email.com",
+		Password: "1 2345",
+	}
+
+	id, err = service.CreateUser(ctx, &user3)
+	if err == nil {
+		t.Fatalf("expected err got nil")
+	}
+	if id > 0 {
+		t.Fatalf("expected no id got %v", id)
+	}
+
+	item, err := service.GetUserByID(ctx, 1)
+	if err == nil {
+		t.Fatalf("expected err got nil")
+	}
+	if item != nil {
+		t.Fatalf("expected no user got %v", item)
+	}
+
+	list, err := service.ListUser(ctx, 1, 10)
+	if err != nil {
+		t.Fatalf("expected no error got %v", err)
+	}
+	if len(list) != 0 {
+		t.Fatalf("expected no list got %v", list)
+	}
+
+	err = service.DeleteUser(ctx, 1)
+	if err == nil {
+		t.Fatalf("expected an error got nil")
 	}
 
 	t.Cleanup(func() {
