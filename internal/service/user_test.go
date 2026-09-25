@@ -14,6 +14,7 @@ import (
 	"main.go/internal/domain"
 	_ "main.go/internal/infra/db/migrations"
 	"main.go/internal/infra/db/repo"
+	"main.go/internal/service/validation"
 )
 
 func createTestDB(t *testing.T) (*sql.DB, *gorm.DB) {
@@ -79,7 +80,8 @@ func Test_User(t *testing.T) {
 	}
 
 	repository := repo.NewArticlesDB(test)
-	service := NewArticleService(repository)
+	validation := validation.New()
+	service := NewArticleService(repository, validation)
 
 	ctx := context.Background()
 
@@ -159,7 +161,8 @@ func Test_User_InvalidValues(t *testing.T) {
 	}
 
 	repository := repo.NewArticlesDB(test)
-	service := NewArticleService(repository)
+	validation := validation.New()
+	service := NewArticleService(repository, validation)
 
 	ctx := context.Background()
 

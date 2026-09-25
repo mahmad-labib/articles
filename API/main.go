@@ -19,6 +19,7 @@ import (
 	"main.go/internal/infra/db/repo"
 	db "main.go/internal/infra/db/repo"
 	"main.go/internal/service"
+	"main.go/internal/service/validation"
 )
 
 func main() {
@@ -45,7 +46,8 @@ func main() {
 	r.Use(middleware.Logger)
 
 	repository := repo.NewArticlesDB(db)
-	service := service.NewArticleService(repository)
+	validation := validation.New()
+	service := service.NewArticleService(repository, validation)
 	r.Mount("/", router.NewArticlesRouter(service))
 
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {

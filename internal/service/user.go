@@ -4,31 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
-	"net/mail"
-	"unicode"
-	"unicode/utf8"
 
 	"golang.org/x/crypto/bcrypt"
 	"main.go/internal/domain"
+	"main.go/internal/service/validation"
 )
-
-var (
-	emailErr       = errors.New("email")
-	empty          = errors.New("field is required")
-	nameLength     = errors.New("name length min is 2 and max is 30")
-	emailUnique    = errors.New("this email already exists")
-	passwordSpaces = errors.New("password cant conatin spaces")
-)
-
-func isValidEmail(email string) bool {
-	addr, err := mail.ParseAddress(email)
-	if err != nil {
-		return false
-	}
-
-	return addr.Address == email
-}
 
 func (a *ArticleService) GetUserByEmail(ctx context.Context, Email string) (*domain.ApiUser, error) {
 	user, err := a.repo.GetUserByEmail(ctx, Email)
@@ -37,55 +17,6 @@ func (a *ArticleService) GetUserByEmail(ctx context.Context, Email string) (*dom
 	}
 
 	return user, nil
-}
-
-func (a *ArticleService) validateUser(ctx context.Context, user *domain.User) error {
-	pass := utf8.RuneCountInString(user.Password)
-	if pass == 0 {
-		return fmt.Errorf("password %v", empty)
-	}
-
-	for _, r := range user.Password {
-		if unicode.IsSpace(r) {
-			return passwordSpaces
-		}
-	}
-
-	name := utf8.RuneCountInString(user.Name)
-	if name == 0 {
-		return fmt.Errorf("name %v", empty)
-	}
-	if name < 2 || name > 30 {
-		return nameLength
-	}
-
-	for _, r := range user.Email {
-		if unicode.IsSpace(r) {
-			return fmt.Errorf("%v email cant conatin spaces", emailErr)
-		}
-	}
-
-	if res := isValidEmail(user.Email); !res {
-		return fmt.Errorf("invalid %v", emailErr)
-	}
-
-	email := utf8.RuneCountInString(user.Email)
-	if email == 0 {
-		return fmt.Errorf("email %v", empty)
-	}
-	if email > 100 {
-		return fmt.Errorf("%v length max is 100", emailErr)
-	}
-
-	userWithEmail, err := a.GetUserByEmail(ctx, user.Email)
-	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		return nil
-	}
-	if userWithEmail != nil && userWithEmail.Email != "" {
-		return emailUnique
-	}
-
-	return nil
 }
 
 func (a *ArticleService) hashPass(user *domain.User) (*domain.User, error) {
@@ -102,7 +33,7 @@ func (a *ArticleService) hashPass(user *domain.User) (*domain.User, error) {
 }
 
 func (a *ArticleService) CreateUser(ctx context.Context, domUser *domain.User) (int64, error) {
-	err := a.validateUser(ctx, domUser)
+	err := a.validator.ValidateUser(domUser)
 	if err != nil {
 		return 0, err
 	}
@@ -110,6 +41,14 @@ func (a *ArticleService) CreateUser(ctx context.Context, domUser *domain.User) (
 	domUser, err = a.hashPass(domUser)
 	if err != nil {
 		return 0, err
+	}
+
+	userWithEmail, err := a.GetUserByEmail(ctx, domUser.Email)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return 0, nil
+	}
+	if userWithEmail != nil && userWithEmail.Email != "" {
+		return 0, validation.EmailUnique
 	}
 
 	id, err := a.repo.CreateUser(ctx, domUser)

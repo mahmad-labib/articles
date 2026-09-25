@@ -28,13 +28,19 @@ type ArticlesRepository interface {
 	GetUserByEmail(ctx context.Context, Email string) (*domain.ApiUser, error)
 }
 
-type ArticleService struct {
-	repo ArticlesRepository
+type Validator interface {
+	ValidateUser(item *domain.User) error
 }
 
-func NewArticleService(repo ArticlesRepository) *ArticleService {
+type ArticleService struct {
+	repo      ArticlesRepository
+	validator Validator
+}
+
+func NewArticleService(repo ArticlesRepository, validator Validator) *ArticleService {
 	return &ArticleService{
-		repo: repo,
+		repo:      repo,
+		validator: validator,
 	}
 }
 
