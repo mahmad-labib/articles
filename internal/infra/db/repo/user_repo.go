@@ -25,27 +25,27 @@ func (c *Core) CreateUser(ctx context.Context, domUser *domain.User) (int64, err
 	return User.ID, nil
 }
 
-func (c *Core) GetUserByID(ctx context.Context, ID int64) (*domain.ApiUser, error) {
+func (c *Core) GetUserByID(ctx context.Context, ID int64) *domain.ApiUser {
 	User := models.User{}
 	Item := domain.ApiUser{}
 
 	err := c.db.First(&User, ID).Error
 	if err != nil {
-		return &Item, err
+		return nil
 	}
 
 	Item.Email = User.Email
 	Item.ID = User.ID
 	Item.Name = User.Name
 
-	return &Item, nil
+	return &Item
 }
 
 func (c *Core) GetUserByEmail(ctx context.Context, Email string) (*domain.ApiUser, error) {
 	User := models.User{}
 	Item := domain.ApiUser{}
 
-	err := c.db.Find(&User, &models.User{Email: Email}).Error
+	err := c.db.First(&User, &models.User{Email: Email}).Error
 	if err != nil {
 		return nil, err
 	}

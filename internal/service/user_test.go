@@ -97,10 +97,7 @@ func Test_User(t *testing.T) {
 		t.Fatalf("expected new user got nil")
 	}
 
-	item, err := service.GetUserByID(ctx, id)
-	if err != nil {
-		t.Fatalf("failed to find created user with err: %v", err)
-	}
+	item := service.GetUserByID(ctx, id)
 	if item == nil || item.ID == 0 {
 		t.Fatalf("expected a user got nil")
 	}
@@ -171,7 +168,6 @@ func Test_User_InvalidValues(t *testing.T) {
 		Email:    "user@email.com",
 		Password: "12345",
 	}
-
 	id, err := service.CreateUser(ctx, &user1)
 	if err == nil {
 		t.Fatalf("expected err got nil")
@@ -185,7 +181,6 @@ func Test_User_InvalidValues(t *testing.T) {
 		Email:    "",
 		Password: "12345",
 	}
-
 	id, err = service.CreateUser(ctx, &user2)
 	if err == nil {
 		t.Fatalf("expected err got nil")
@@ -196,10 +191,9 @@ func Test_User_InvalidValues(t *testing.T) {
 
 	user3 := domain.User{
 		Name:     "name",
-		Email:    "user@email.com",
+		Email:    "user@.com",
 		Password: "1 2345",
 	}
-
 	id, err = service.CreateUser(ctx, &user3)
 	if err == nil {
 		t.Fatalf("expected err got nil")
@@ -208,14 +202,22 @@ func Test_User_InvalidValues(t *testing.T) {
 		t.Fatalf("expected no id got %v", id)
 	}
 
-	item, err := service.GetUserByID(ctx, 1)
+	user4 := domain.User{
+		Name:     "name",
+		Email:    "user@email.com",
+		Password: "1 2345",
+	}
+	id, err = service.CreateUser(ctx, &user4)
 	if err == nil {
 		t.Fatalf("expected err got nil")
 	}
+	if id > 0 {
+		t.Fatalf("expected no id got %v", id)
+	}
+	item := service.GetUserByID(ctx, 1)
 	if item != nil {
 		t.Fatalf("expected no user got %v", item)
 	}
-
 	list, err := service.ListUser(ctx, 1, 10)
 	if err != nil {
 		t.Fatalf("expected no error got %v", err)
