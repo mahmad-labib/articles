@@ -46,7 +46,7 @@ func (a *ArticleService) validateUser(ctx context.Context, user *domain.User) er
 	if name == 0 {
 		return fmt.Errorf("name %v", empty)
 	}
-	if name < 5 || name > 30 {
+	if name < 2 || name > 30 {
 		return nameLength
 	}
 
@@ -96,4 +96,31 @@ func (a *ArticleService) CreateUser(ctx context.Context, domUser *domain.User) (
 	}
 
 	return id, nil
+}
+
+func (a *ArticleService) GetUserByID(ctx context.Context, ID int64) (*domain.ApiUser, error) {
+	user, err := a.repo.GetUserByID(ctx, ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func (a *ArticleService) ListUser(ctx context.Context, Page, PageSize int) ([]domain.ApiUser, error) {
+	usersList, err := a.repo.ListUser(ctx, Page, PageSize)
+	if err != nil {
+		return usersList, err
+	}
+
+	return usersList, nil
+}
+
+func (a *ArticleService) DeleteUser(ctx context.Context, Id int64) error {
+	err := a.repo.DeleteUser(ctx, Id)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

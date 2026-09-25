@@ -4,15 +4,10 @@ import (
 	"log"
 	"testing"
 
-	"embed"
-
 	"github.com/pressly/goose/v3"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
-
-//go:embed *.go
-var MigrationFiles embed.FS
 
 func TestMigrations(t *testing.T) {
 	admin, err := gorm.Open(postgres.Open("postgres://postgres:123@localhost:5432/postgres?sslmode=disable"), &gorm.Config{})
