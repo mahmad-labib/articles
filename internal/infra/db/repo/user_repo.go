@@ -41,31 +41,31 @@ func (c *Core) GetUserByID(ctx context.Context, ID int64) *domain.ApiUser {
 	return &Item
 }
 
-func (c *Core) GetUserByEmail(ctx context.Context, Email string) *domain.ApiUser {
+func (c *Core) GetUserByEmail(ctx context.Context, Email string) (*domain.ApiUser, error) {
 	User := models.User{}
 	Item := domain.ApiUser{}
 
 	err := c.db.First(&User, &models.User{Email: Email}).Error
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
 	Item.Email = User.Email
 	Item.ID = User.ID
 	Item.Name = User.Name
 
-	return &Item
+	return &Item, nil
 }
 
-func (c *Core) GetUserByEmail_Login(ctx context.Context, Email string) string {
+func (c *Core) GetUserByEmail_Login(ctx context.Context, Email string) (string, error) {
 	User := models.User{}
 
 	err := c.db.First(&User, &models.User{Email: Email}).Error
 	if err != nil {
-		return ""
+		return "", err
 	}
 
-	return User.PasswordHash
+	return User.PasswordHash, nil
 }
 
 func (c *Core) UpdateUser(ctx context.Context, domUser *domain.ApiUser) error {

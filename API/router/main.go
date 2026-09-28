@@ -34,6 +34,10 @@ func handleServiceError(w http.ResponseWriter, err error) {
 	writeError(w, http.StatusUnprocessableEntity, "Validation Error", []string{err.Error()})
 }
 
+func handleRequestError(w http.ResponseWriter, err error) {
+	writeError(w, http.StatusBadRequest, "Bad Request", []string{err.Error()})
+}
+
 func writeError(w http.ResponseWriter, status int, message string, details []string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
@@ -45,18 +49,44 @@ func writeError(w http.ResponseWriter, status int, message string, details []str
 	})
 }
 
-func handleRequestError(w http.ResponseWriter, err error) {
-	writeError(w, http.StatusBadRequest, "Bad Request", []string{err.Error()})
-}
-
 func NewArticlesRouter(svc ArticlesService, jwt *jwtauth.JWTAuth) chi.Router {
 	h := &ArticlesHandler{svc: svc, jwt: jwt}
 
 	r := chi.NewRouter()
-	r.Use(jwtauth.Verifier(jwt))
 	r.Post("/users/register", h.CreateUser)
 	r.Post("/users/login", h.login)
-	r.Get("/user/profile", h.UserProfile)
+
+	r.Group(func(r chi.Router) {
+		r.Use(jwtauth.Verifier(jwt))
+		r.Use(Authenticator(jwt))
+
+		r.Get("/user/profile", h.UserProfile)
+	})
 
 	return r
+}
+
+func Authenticator(ja *jwtauth.JWTAuth) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		hfn := func(w http.ResponseWriter, r *http.Request) {
+			token, _, err := jwtauth.FromContext(r.Context())
+
+			w.Header().Set("Content-Type", "application/json")
+
+			if err != nil {
+				w.WriteHeader(http.StatusUnauthorized)
+				json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+				return
+			}
+
+			if token == nil {
+				w.WriteHeader(http.StatusUnauthorized)
+				json.NewEncoder(w).Encode(map[string]string{"error": "unauthorized: token not found"})
+				return
+			}
+
+			next.ServeHTTP(w, r)
+		}
+		return http.HandlerFunc(hfn)
+	}
 }

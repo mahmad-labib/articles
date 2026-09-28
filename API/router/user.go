@@ -2,7 +2,6 @@ package router
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/go-chi/jwtauth/v5"
@@ -41,7 +40,7 @@ func (a *ArticlesHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 func (a *ArticlesHandler) UserProfile(w http.ResponseWriter, r *http.Request) {
 	var userID int64
 	_, claims, _ := jwtauth.FromContext(r.Context())
-	fmt.Println(claims)
+
 	if val, ok := claims["user_id"].(float64); ok {
 		userID = int64(val)
 	}
