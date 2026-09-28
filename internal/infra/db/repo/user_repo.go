@@ -1,4 +1,4 @@
-package db
+package repo
 
 import (
 	"context"
@@ -9,14 +9,14 @@ import (
 	"main.go/internal/infra/db/models"
 )
 
-func (C *Core) CreateUser(ctx context.Context, domUser *domain.User) (int64, error) {
+func (c *Core) CreateUser(ctx context.Context, domUser *domain.User) (int64, error) {
 	User := models.User{
 		Name:         domUser.Name,
 		Email:        domUser.Email,
-		PasswordHash: domUser.PasswordHash,
+		PasswordHash: domUser.Password,
 	}
 
-	result := C.db.WithContext(ctx).Create(&User)
+	result := c.db.WithContext(ctx).Create(&User)
 	if result.Error != nil {
 		err := fmt.Errorf("failed to create new User with err: %w", result.Error)
 		return 0, err
@@ -25,13 +25,29 @@ func (C *Core) CreateUser(ctx context.Context, domUser *domain.User) (int64, err
 	return User.ID, nil
 }
 
-func (C *Core) GetUserByID(ctx context.Context, ID int64) (*domain.User, error) {
+func (c *Core) GetUserByID(ctx context.Context, ID int64) *domain.ApiUser {
 	User := models.User{}
-	Item := domain.User{}
+	Item := domain.ApiUser{}
 
-	err := C.db.First(&User, ID).Error
+	err := c.db.First(&User, ID).Error
 	if err != nil {
-		return &Item, err
+		return nil
+	}
+
+	Item.Email = User.Email
+	Item.ID = User.ID
+	Item.Name = User.Name
+
+	return &Item
+}
+
+func (c *Core) GetUserByEmail(ctx context.Context, Email string) (*domain.ApiUser, error) {
+	User := models.User{}
+	Item := domain.ApiUser{}
+
+	err := c.db.First(&User, &models.User{Email: Email}).Error
+	if err != nil {
+		return nil, err
 	}
 
 	Item.Email = User.Email
@@ -41,13 +57,13 @@ func (C *Core) GetUserByID(ctx context.Context, ID int64) (*domain.User, error) 
 	return &Item, nil
 }
 
-func (C *Core) UpdateUser(ctx context.Context, domUser *domain.User) error {
+func (c *Core) UpdateUser(ctx context.Context, domUser *domain.ApiUser) error {
 	User := models.User{
 		Name:  domUser.Name,
 		Email: domUser.Email,
 	}
 
-	res := C.db.WithContext(ctx).Model(&models.User{}).Where("id = ?", domUser.ID).Updates(User)
+	res := c.db.WithContext(ctx).Model(&models.User{}).Where("id = ?", domUser.ID).Updates(User)
 
 	if res.Error != nil {
 		return fmt.Errorf("error when update User with id=%d: %w", domUser.ID, res.Error)
@@ -60,17 +76,17 @@ func (C *Core) UpdateUser(ctx context.Context, domUser *domain.User) error {
 	return nil
 }
 
-func (C *Core) ListUser(ctx context.Context, Page, PageSize int) ([]domain.User, error) {
+func (c *Core) ListUser(ctx context.Context, Page, PageSize int) ([]domain.ApiUser, error) {
 	var Users []models.User
 
-	err := C.db.Scopes(Paginate(Page, PageSize)).Find(&Users).Error
+	err := c.db.Scopes(Paginate(Page, PageSize)).Find(&Users).Error
 	if err != nil {
 		return nil, err
 	}
 
-	list := make([]domain.User, 0, len(Users))
+	list := make([]domain.ApiUser, 0, len(Users))
 	for _, t := range Users {
-		list = append(list, domain.User{
+		list = append(list, domain.ApiUser{
 			ID:    t.ID,
 			Name:  t.Name,
 			Email: t.Email,
@@ -80,8 +96,8 @@ func (C *Core) ListUser(ctx context.Context, Page, PageSize int) ([]domain.User,
 	return list, nil
 }
 
-func (C *Core) DeleteUser(ctx context.Context, id int64) error {
-	res := C.db.Delete(&models.User{}, id)
+func (c *Core) DeleteUser(ctx context.Context, id int64) error {
+	res := c.db.Delete(&models.User{}, id)
 	if res.Error != nil {
 		return res.Error
 	}

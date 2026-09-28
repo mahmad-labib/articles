@@ -1,4 +1,4 @@
-package db
+package repo
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 
 func (C *Core) CreateComment(ctx context.Context, comment domain.Comment, userId int64, articleId int64) error {
 	Comment := models.Comment{
-		AuthorID:  userId,
+		UserID:    userId,
 		ArticleID: articleId,
 		Body:      comment.Body,
 	}
