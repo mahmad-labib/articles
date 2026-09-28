@@ -36,3 +36,8 @@ func ServerTimeout(envName string, defaultValue int) int {
 	}
 	return defaultValue
 }
+
+func JWT() string {
+	value := os.Getenv("JWT_SECRET")
+	return value
+}

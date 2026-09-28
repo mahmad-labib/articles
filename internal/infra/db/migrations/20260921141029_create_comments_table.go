@@ -16,12 +16,12 @@ func upCreateCommentsTable(ctx context.Context, tx *sql.Tx) error {
         CREATE TABLE comments (
             id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
             article_id BIGINT NOT NULL,
-            author_id BIGINT NOT NULL,
+            user_id BIGINT NOT NULL,
             body TEXT NOT NULL,
             created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
             FOREIGN KEY (article_id) REFERENCES articles(id) ON DELETE CASCADE,
-            FOREIGN KEY (author_id) REFERENCES users(id)
+            FOREIGN KEY (user_id) REFERENCES users(id)
         )
     `)
 	return err

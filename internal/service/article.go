@@ -25,7 +25,9 @@ type ArticlesRepository interface {
 	UpdateUser(ctx context.Context, domUser *domain.ApiUser) error
 	ListUser(ctx context.Context, Page, PageSize int) ([]domain.ApiUser, error)
 	DeleteUser(ctx context.Context, ID int64) error
-	GetUserByEmail(ctx context.Context, Email string) (*domain.ApiUser, error)
+	GetUserByEmail(ctx context.Context, Email string) *domain.ApiUser
+	GetUserByEmail_Login(ctx context.Context, Email string) string
+	GetProfile(ctx context.Context, id int64) (*domain.Profile, error)
 }
 
 type Validator interface {
