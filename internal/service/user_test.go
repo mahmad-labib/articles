@@ -17,7 +17,7 @@ import (
 	"main.go/internal/service/validation"
 )
 
-func createTestDB(t *testing.T) (*sql.DB, *gorm.DB) {
+func CreateTestDB(t *testing.T) (*sql.DB, *gorm.DB) {
 	admin, err := gorm.Open(postgres.Open("postgres://postgres:123@localhost:5432/postgres?sslmode=disable"), &gorm.Config{})
 	if err != nil {
 		t.Fatal(err)
@@ -49,7 +49,7 @@ func createTestDB(t *testing.T) (*sql.DB, *gorm.DB) {
 	return adminDB, test
 }
 func Test_User(t *testing.T) {
-	adminDB, test := createTestDB(t)
+	adminDB, test := CreateTestDB(t)
 
 	testDB, err := test.DB()
 	if err != nil {
@@ -81,7 +81,7 @@ func Test_User(t *testing.T) {
 
 	repository := repo.NewArticlesDB(test)
 	validation := validation.New()
-	service := NewArticleService(repository, validation)
+	service := NewUserService(repository, validation)
 
 	ctx := context.Background()
 
@@ -130,7 +130,7 @@ func Test_User(t *testing.T) {
 }
 
 func Test_User_InvalidValues(t *testing.T) {
-	adminDB, test := createTestDB(t)
+	adminDB, test := CreateTestDB(t)
 
 	testDB, err := test.DB()
 	if err != nil {
@@ -162,7 +162,7 @@ func Test_User_InvalidValues(t *testing.T) {
 
 	repository := repo.NewArticlesDB(test)
 	validation := validation.New()
-	service := NewArticleService(repository, validation)
+	service := NewUserService(repository, validation)
 
 	ctx := context.Background()
 

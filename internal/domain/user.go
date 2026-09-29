@@ -7,8 +7,13 @@ type User struct {
 }
 
 type ApiUser struct {
-	ID        int64  `json:"id"`
-	Name      string `json:"name"`
-	Email     string `json:"email"`
-	Passwords string `json:"password_hash"`
+	ID       int64  `json:"id"`
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Password string `json:"password_hash"`
+}
+
+type Profile struct {
+	User     User
+	Articles []Article
 }

@@ -57,6 +57,17 @@ func (c *Core) GetUserByEmail(ctx context.Context, Email string) (*domain.ApiUse
 	return &Item, nil
 }
 
+func (c *Core) GetUserByEmail_Login(ctx context.Context, Email string) (string, error) {
+	User := models.User{}
+
+	err := c.db.First(&User, &models.User{Email: Email}).Error
+	if err != nil {
+		return "", err
+	}
+
+	return User.PasswordHash, nil
+}
+
 func (c *Core) UpdateUser(ctx context.Context, domUser *domain.ApiUser) error {
 	User := models.User{
 		Name:  domUser.Name,
@@ -107,4 +118,34 @@ func (c *Core) DeleteUser(ctx context.Context, id int64) error {
 	}
 
 	return nil
+}
+
+func (c *Core) GetProfile(ctx context.Context, id int64) (*domain.Profile, error) {
+	var user models.User
+	if id == 0 {
+		return nil, gorm.ErrRecordNotFound
+	}
+
+	err := c.db.Preload("Articles").Find(&user, &models.User{ID: id}).Error
+	if err != nil {
+		return nil, err
+	}
+
+	var profile = domain.Profile{
+		User: domain.User{
+			Name:  user.Name,
+			Email: user.Email,
+		},
+		Articles: []domain.Article{},
+	}
+
+	for _, val := range user.Articles {
+		article := domain.Article{
+			Title: val.Title,
+			Slug:  val.Slug,
+		}
+		profile.Articles = append(profile.Articles, article)
+	}
+
+	return &profile, nil
 }

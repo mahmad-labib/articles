@@ -14,6 +14,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/jwtauth/v5"
 	"main.go/API/router"
 	"main.go/internal/config"
 	"main.go/internal/infra/db/repo"
@@ -31,6 +32,12 @@ func main() {
 		os.Exit(1)
 	}
 
+	var tokenAuth = jwtauth.New(
+		"HS256",
+		[]byte(cfg.JWT),
+		nil,
+	)
+
 	db, err := db.NewClient(cfg.DB.DSN)
 	if err != nil {
 		log.Fatal(err)
@@ -47,8 +54,8 @@ func main() {
 
 	repository := repo.NewArticlesDB(db)
 	validation := validation.New()
-	service := service.NewArticleService(repository, validation)
-	r.Mount("/", router.NewArticlesRouter(service))
+	service := service.NewUserService(repository, validation)
+	r.Mount("/", router.NewUsersRouter(service, tokenAuth))
 
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Hello World!"))

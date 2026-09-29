@@ -20,14 +20,14 @@ func upCreateArticlesTable(ctx context.Context, tx *sql.Tx) error {
             body TEXT NOT NULL,
             status TEXT NOT NULL DEFAULT 'draft'
                 CHECK (status IN ('draft', 'scheduled', 'published')),
-            author_id BIGINT NOT NULL,
+            user_id BIGINT NOT NULL,
             category_id BIGINT NOT NULL,
             published_at TIMESTAMPTZ NULL,
             created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
             deleted_at TIMESTAMPTZ NULL,
 
             CONSTRAINT fk_articles_author
-                FOREIGN KEY (author_id) REFERENCES users(id),
+                FOREIGN KEY (user_id) REFERENCES users(id),
 
             CONSTRAINT fk_articles_category
                 FOREIGN KEY (category_id) REFERENCES categories(id)
