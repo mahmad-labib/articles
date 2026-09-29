@@ -10,7 +10,7 @@ type UserLogin struct {
 	Password string `json:"password"`
 }
 
-func (a *UserHandler) login(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandler) login(w http.ResponseWriter, r *http.Request) {
 	var body UserLogin
 
 	decoder := json.NewDecoder(r.Body)
@@ -20,7 +20,7 @@ func (a *UserHandler) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := a.svc.Login(r.Context(), body.Email, body.Password, a.jwt)
+	token, err := h.svc.Login(r.Context(), body.Email, body.Password, h.jwt)
 	if err != nil {
 		handleServiceError(w, err)
 		return

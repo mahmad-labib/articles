@@ -15,8 +15,8 @@ var (
 	PasswordInvalid = errors.New("password is not correct")
 )
 
-func (a *UserService) GetUserByEmail(ctx context.Context, Email string) (*domain.ApiUser, error) {
-	user, err := a.repo.GetUserByEmail(ctx, Email)
+func (s *UserService) GetUserByEmail(ctx context.Context, Email string) (*domain.ApiUser, error) {
+	user, err := s.repo.GetUserByEmail(ctx, Email)
 	if err != nil {
 		return nil, gorm.ErrRecordNotFound
 	}
@@ -24,7 +24,7 @@ func (a *UserService) GetUserByEmail(ctx context.Context, Email string) (*domain
 	return user, nil
 }
 
-func (a *UserService) hashPass(user *domain.User) (*domain.User, error) {
+func (s *UserService) hashPass(user *domain.User) (*domain.User, error) {
 	hash, err := bcrypt.GenerateFromPassword(
 		[]byte(user.Password),
 		bcrypt.DefaultCost,
@@ -37,18 +37,18 @@ func (a *UserService) hashPass(user *domain.User) (*domain.User, error) {
 	return user, nil
 }
 
-func (a *UserService) CreateUser(ctx context.Context, domUser *domain.User) (int64, error) {
-	err := a.validator.ValidateUser(domUser)
+func (s *UserService) CreateUser(ctx context.Context, domUser *domain.User) (int64, error) {
+	err := s.validator.ValidateUser(domUser)
 	if err != nil {
 		return 0, err
 	}
 
-	domUser, err = a.hashPass(domUser)
+	domUser, err = s.hashPass(domUser)
 	if err != nil {
 		return 0, err
 	}
 
-	id, err := a.repo.CreateUser(ctx, domUser)
+	id, err := s.repo.CreateUser(ctx, domUser)
 	if err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			return 0, validation.EmailUnique
@@ -59,14 +59,14 @@ func (a *UserService) CreateUser(ctx context.Context, domUser *domain.User) (int
 	return id, nil
 }
 
-func (a *UserService) GetUserByID(ctx context.Context, ID int64) *domain.ApiUser {
-	user := a.repo.GetUserByID(ctx, ID)
+func (s *UserService) GetUserByID(ctx context.Context, ID int64) *domain.ApiUser {
+	user := s.repo.GetUserByID(ctx, ID)
 
 	return user
 }
 
-func (a *UserService) ListUser(ctx context.Context, Page, PageSize int) ([]domain.ApiUser, error) {
-	usersList, err := a.repo.ListUser(ctx, Page, PageSize)
+func (s *UserService) ListUser(ctx context.Context, Page, PageSize int) ([]domain.ApiUser, error) {
+	usersList, err := s.repo.ListUser(ctx, Page, PageSize)
 	if err != nil {
 		return usersList, err
 	}
@@ -74,8 +74,8 @@ func (a *UserService) ListUser(ctx context.Context, Page, PageSize int) ([]domai
 	return usersList, nil
 }
 
-func (a *UserService) DeleteUser(ctx context.Context, Id int64) error {
-	err := a.repo.DeleteUser(ctx, Id)
+func (s *UserService) DeleteUser(ctx context.Context, Id int64) error {
+	err := s.repo.DeleteUser(ctx, Id)
 	if err != nil {
 		return err
 	}
@@ -83,13 +83,13 @@ func (a *UserService) DeleteUser(ctx context.Context, Id int64) error {
 	return nil
 }
 
-func (a *UserService) Login(ctx context.Context, email, password string, jwt *jwtauth.JWTAuth) (string, error) {
-	user, err := a.repo.GetUserByEmail(ctx, email)
+func (s *UserService) Login(ctx context.Context, email, password string, jwt *jwtauth.JWTAuth) (string, error) {
+	user, err := s.repo.GetUserByEmail(ctx, email)
 	if err != nil {
 		return "", gorm.ErrRecordNotFound
 	}
 
-	userPass, err := a.repo.GetUserByEmail_Login(ctx, email)
+	userPass, err := s.repo.GetUserByEmail_Login(ctx, email)
 	if err != nil {
 		return "", gorm.ErrRecordNotFound
 	}
@@ -110,12 +110,12 @@ func (a *UserService) Login(ctx context.Context, email, password string, jwt *jw
 	return token, nil
 }
 
-func (a *UserService) GetProfile(ctx context.Context, id int64) (*domain.Profile, error) {
+func (s *UserService) GetProfile(ctx context.Context, id int64) (*domain.Profile, error) {
 	if id == 0 {
 		return nil, gorm.ErrInvalidValue
 	}
 
-	user, err := a.repo.GetProfile(ctx, id)
+	user, err := s.repo.GetProfile(ctx, id)
 	if err != nil {
 		return user, err
 	}
