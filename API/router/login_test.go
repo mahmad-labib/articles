@@ -67,7 +67,7 @@ func TestFullAuthFlow(t *testing.T) {
 
 	repository := repo.NewArticlesDB(test)
 	validation := validation.New()
-	service := service.NewArticleService(repository, validation)
+	service := service.NewUserService(repository, validation)
 
 	user := domain.User{
 		Name:     "user",
@@ -91,7 +91,7 @@ func TestFullAuthFlow(t *testing.T) {
 		nil,
 	)
 
-	router := NewArticlesRouter(service, tokenAuth)
+	router := NewUsersRouter(service, tokenAuth)
 
 	loginBody := bytes.NewBufferString(`{"email":"user@example.com","password":"password123"}`)
 	reqLogin := httptest.NewRequest(http.MethodPost, "/users/login", loginBody)

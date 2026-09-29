@@ -81,7 +81,7 @@ func Test_User(t *testing.T) {
 
 	repository := repo.NewArticlesDB(test)
 	validation := validation.New()
-	service := NewArticleService(repository, validation)
+	service := NewUserService(repository, validation)
 
 	ctx := context.Background()
 
@@ -162,7 +162,7 @@ func Test_User_InvalidValues(t *testing.T) {
 
 	repository := repo.NewArticlesDB(test)
 	validation := validation.New()
-	service := NewArticleService(repository, validation)
+	service := NewUserService(repository, validation)
 
 	ctx := context.Background()
 

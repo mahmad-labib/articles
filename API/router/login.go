@@ -6,13 +6,16 @@ import (
 )
 
 type UserLogin struct {
-	Email    string
-	Password string
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
-func (a *ArticlesHandler) login(w http.ResponseWriter, r *http.Request) {
+func (a *UserHandler) login(w http.ResponseWriter, r *http.Request) {
 	var body UserLogin
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&body); err != nil {
 		handleRequestError(w, err)
 		return
 	}

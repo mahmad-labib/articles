@@ -14,20 +14,23 @@ type UserRequest struct {
 	Password string `json:"password"`
 }
 
-func (a *ArticlesHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
+func (a *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var body UserRequest
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&body); err != nil {
 		handleRequestError(w, err)
 		return
 	}
 
-	User := domain.User{
+	user := domain.User{
 		Name:     body.Name,
 		Email:    body.Email,
 		Password: body.Password,
 	}
 
-	id, err := a.svc.CreateUser(r.Context(), &User)
+	id, err := a.svc.CreateUser(r.Context(), &user)
 	if err != nil {
 		handleServiceError(w, err)
 		return
@@ -37,7 +40,7 @@ func (a *ArticlesHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]any{"id": id})
 }
 
-func (a *ArticlesHandler) UserProfile(w http.ResponseWriter, r *http.Request) {
+func (a *UserHandler) UserProfile(w http.ResponseWriter, r *http.Request) {
 	var userID int64
 	_, claims, _ := jwtauth.FromContext(r.Context())
 

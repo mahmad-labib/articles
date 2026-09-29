@@ -34,19 +34,19 @@ type Validator interface {
 	ValidateUser(item *domain.User) error
 }
 
-type ArticleService struct {
+type UserService struct {
 	repo      ArticlesRepository
 	validator Validator
 }
 
-func NewArticleService(repo ArticlesRepository, validator Validator) *ArticleService {
-	return &ArticleService{
+func NewUserService(repo ArticlesRepository, validator Validator) *UserService {
+	return &UserService{
 		repo:      repo,
 		validator: validator,
 	}
 }
 
-func (s *ArticleService) CreateArticle(ctx context.Context, article domain.Article, userId int64, catId int64, tags []domain.Tag) error {
+func (s *UserService) CreateArticle(ctx context.Context, article domain.Article, userId int64, catId int64, tags []domain.Tag) error {
 	err := s.repo.CreateArticle(ctx, article, userId, catId, tags)
 	if err != nil {
 		return err

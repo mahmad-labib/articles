@@ -12,10 +12,10 @@ import (
 )
 
 var (
-	passwordInvalid = errors.New("password is not correct")
+	PasswordInvalid = errors.New("password is not correct")
 )
 
-func (a *ArticleService) GetUserByEmail(ctx context.Context, Email string) (*domain.ApiUser, error) {
+func (a *UserService) GetUserByEmail(ctx context.Context, Email string) (*domain.ApiUser, error) {
 	user, err := a.repo.GetUserByEmail(ctx, Email)
 	if err != nil {
 		return nil, gorm.ErrRecordNotFound
@@ -24,7 +24,7 @@ func (a *ArticleService) GetUserByEmail(ctx context.Context, Email string) (*dom
 	return user, nil
 }
 
-func (a *ArticleService) hashPass(user *domain.User) (*domain.User, error) {
+func (a *UserService) hashPass(user *domain.User) (*domain.User, error) {
 	hash, err := bcrypt.GenerateFromPassword(
 		[]byte(user.Password),
 		bcrypt.DefaultCost,
@@ -37,7 +37,7 @@ func (a *ArticleService) hashPass(user *domain.User) (*domain.User, error) {
 	return user, nil
 }
 
-func (a *ArticleService) CreateUser(ctx context.Context, domUser *domain.User) (int64, error) {
+func (a *UserService) CreateUser(ctx context.Context, domUser *domain.User) (int64, error) {
 	err := a.validator.ValidateUser(domUser)
 	if err != nil {
 		return 0, err
@@ -48,26 +48,24 @@ func (a *ArticleService) CreateUser(ctx context.Context, domUser *domain.User) (
 		return 0, err
 	}
 
-	userWithEmail, _ := a.repo.GetUserByEmail(ctx, domUser.Email)
-	if userWithEmail != nil && userWithEmail.Email != "" {
-		return 0, validation.EmailUnique
-	}
-
 	id, err := a.repo.CreateUser(ctx, domUser)
 	if err != nil {
+		if errors.Is(err, gorm.ErrDuplicatedKey) {
+			return 0, validation.EmailUnique
+		}
 		return 0, err
 	}
 
 	return id, nil
 }
 
-func (a *ArticleService) GetUserByID(ctx context.Context, ID int64) *domain.ApiUser {
+func (a *UserService) GetUserByID(ctx context.Context, ID int64) *domain.ApiUser {
 	user := a.repo.GetUserByID(ctx, ID)
 
 	return user
 }
 
-func (a *ArticleService) ListUser(ctx context.Context, Page, PageSize int) ([]domain.ApiUser, error) {
+func (a *UserService) ListUser(ctx context.Context, Page, PageSize int) ([]domain.ApiUser, error) {
 	usersList, err := a.repo.ListUser(ctx, Page, PageSize)
 	if err != nil {
 		return usersList, err
@@ -76,7 +74,7 @@ func (a *ArticleService) ListUser(ctx context.Context, Page, PageSize int) ([]do
 	return usersList, nil
 }
 
-func (a *ArticleService) DeleteUser(ctx context.Context, Id int64) error {
+func (a *UserService) DeleteUser(ctx context.Context, Id int64) error {
 	err := a.repo.DeleteUser(ctx, Id)
 	if err != nil {
 		return err
@@ -85,7 +83,7 @@ func (a *ArticleService) DeleteUser(ctx context.Context, Id int64) error {
 	return nil
 }
 
-func (a *ArticleService) Login(ctx context.Context, email, password string, jwt *jwtauth.JWTAuth) (string, error) {
+func (a *UserService) Login(ctx context.Context, email, password string, jwt *jwtauth.JWTAuth) (string, error) {
 	user, err := a.repo.GetUserByEmail(ctx, email)
 	if err != nil {
 		return "", gorm.ErrRecordNotFound
@@ -98,7 +96,7 @@ func (a *ArticleService) Login(ctx context.Context, email, password string, jwt 
 
 	err = bcrypt.CompareHashAndPassword([]byte(userPass), []byte(password))
 	if err != nil {
-		return "", passwordInvalid
+		return "", PasswordInvalid
 	}
 
 	_, token, err := jwt.Encode(map[string]interface{}{
@@ -112,7 +110,11 @@ func (a *ArticleService) Login(ctx context.Context, email, password string, jwt 
 	return token, nil
 }
 
-func (a *ArticleService) GetProfile(ctx context.Context, id int64) (*domain.Profile, error) {
+func (a *UserService) GetProfile(ctx context.Context, id int64) (*domain.Profile, error) {
+	if id == 0 {
+		return nil, gorm.ErrInvalidValue
+	}
+
 	user, err := a.repo.GetProfile(ctx, id)
 	if err != nil {
 		return user, err

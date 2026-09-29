@@ -54,8 +54,8 @@ func main() {
 
 	repository := repo.NewArticlesDB(db)
 	validation := validation.New()
-	service := service.NewArticleService(repository, validation)
-	r.Mount("/", router.NewArticlesRouter(service, tokenAuth))
+	service := service.NewUserService(repository, validation)
+	r.Mount("/", router.NewUsersRouter(service, tokenAuth))
 
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Hello World!"))
