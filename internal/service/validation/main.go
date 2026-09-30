@@ -92,15 +92,26 @@ func (v *Validator) validatePassword(pass string) error {
 }
 
 func (v *Validator) ValidateCategory(category *domain.Category) error {
-	categoryLen := utf8.RuneCountInString(category.Name)
+	NameLen := utf8.RuneCountInString(category.Name)
+	SlugLen := utf8.RuneCountInString(category.Slug)
 
-	if categoryLen == 0 || categoryLen == 1 {
+	if NameLen == 0 || NameLen == 1 {
 		return fmt.Errorf("category name %v %v", Empty, " and the min is 2")
+	}
+
+	if SlugLen == 0 || SlugLen == 1 {
+		return fmt.Errorf("category slug %v %v", Empty, " and the min is 2")
 	}
 
 	for _, r := range category.Name {
 		if unicode.IsSpace(r) {
-			return fmt.Errorf("Category %v", FieldSpaces)
+			return fmt.Errorf("Category Name %v", FieldSpaces)
+		}
+	}
+
+	for _, r := range category.Slug {
+		if unicode.IsSpace(r) {
+			return fmt.Errorf("Category Slug %v", FieldSpaces)
 		}
 	}
 

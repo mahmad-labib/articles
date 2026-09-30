@@ -46,7 +46,12 @@ func (s *UserService) GetCategoryByID(ctx context.Context, id int64) (*domain.Ca
 }
 
 func (s *UserService) UpdateCategory(ctx context.Context, category *domain.Category) error {
-	err := s.repo.UpdateCategory(ctx, category)
+	err := s.validator.ValidateCategory(category)
+	if err != nil {
+		return err
+	}
+
+	err = s.repo.UpdateCategory(ctx, category)
 	if err != nil {
 		return err
 	}

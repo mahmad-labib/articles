@@ -24,6 +24,10 @@ func (C *Core) CreateCategory(ctx context.Context, category *domain.Category) (i
 }
 
 func (C *Core) GetCategoryByID(ctx context.Context, id int64) (*domain.Category, error) {
+	if id <= 0 {
+		return nil, fmt.Errorf("invalid id: %d", id)
+	}
+
 	Category := models.Category{}
 	Item := domain.Category{}
 
