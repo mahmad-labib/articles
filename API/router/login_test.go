@@ -31,19 +31,23 @@ func CreateTestDB(t *testing.T) (*sql.DB, *gorm.DB) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = adminDB.Exec(`DROP DATABASE test_db`)
+
+	_, err = adminDB.Exec(`DROP DATABASE if exists test_db_login`)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	if err := adminDB.Ping(); err != nil {
 		t.Fatal(err)
 	}
 
-	_, err = adminDB.Exec(`CREATE DATABASE test_db`)
+	_, err = adminDB.Exec(`CREATE DATABASE test_db_login`)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	test, err := gorm.Open(
-		postgres.Open("postgres://postgres:123@localhost:5432/test_db?sslmode=disable"),
+		postgres.Open("postgres://postgres:123@localhost:5432/test_db_login?sslmode=disable"),
 		&gorm.Config{},
 	)
 	if err != nil {
@@ -122,7 +126,7 @@ func TestFullAuthFlow(t *testing.T) {
 	t.Cleanup(func() {
 		testDB.Close()
 
-		_, err := adminDB.Exec(`DROP DATABASE test_db`)
+		_, err := adminDB.Exec(`DROP DATABASE if exists test_db_login`)
 		if err != nil {
 			t.Fatalf("failed to drop test database: %v", err)
 		}

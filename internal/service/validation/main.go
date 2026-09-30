@@ -11,11 +11,11 @@ import (
 )
 
 var (
-	EmailErr       = errors.New("email")
-	Empty          = errors.New("field is required")
-	NameLength     = errors.New("name length min is 2 and max is 30")
-	EmailUnique    = errors.New("this email already exists")
-	PasswordSpaces = errors.New("password cant conatin spaces")
+	EmailErr    = errors.New("email")
+	Empty       = errors.New("field is required")
+	NameLength  = errors.New("name length min is 2 and max is 30")
+	EmailUnique = errors.New("this email already exists")
+	FieldSpaces = errors.New("field cant conatin spaces")
 )
 
 func isValidEmail(email string) bool {
@@ -84,7 +84,34 @@ func (v *Validator) validatePassword(pass string) error {
 
 	for _, r := range pass {
 		if unicode.IsSpace(r) {
-			return PasswordSpaces
+			return fmt.Errorf("password %v", FieldSpaces)
+		}
+	}
+
+	return nil
+}
+
+func (v *Validator) ValidateCategory(category *domain.Category) error {
+	NameLen := utf8.RuneCountInString(category.Name)
+	SlugLen := utf8.RuneCountInString(category.Slug)
+
+	if NameLen == 0 || NameLen == 1 {
+		return fmt.Errorf("category name %v %v", Empty, " and the min is 2")
+	}
+
+	if SlugLen == 0 || SlugLen == 1 {
+		return fmt.Errorf("category slug %v %v", Empty, " and the min is 2")
+	}
+
+	for _, r := range category.Name {
+		if unicode.IsSpace(r) {
+			return fmt.Errorf("Category Name %v", FieldSpaces)
+		}
+	}
+
+	for _, r := range category.Slug {
+		if unicode.IsSpace(r) {
+			return fmt.Errorf("Category Slug %v", FieldSpaces)
 		}
 	}
 

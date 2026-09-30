@@ -19,7 +19,14 @@ type UserService interface {
 	CreateUser(ctx context.Context, domUser *domain.User) (int64, error)
 	Login(ctx context.Context, email, password string, jwt *jwtauth.JWTAuth) (string, error)
 	GetProfile(ctx context.Context, id int64) (*domain.Profile, error)
+	CreateCategory(ctx context.Context, category *domain.Category) (int64, error)
+	ListCategories(ctx context.Context, page, pageSize int) ([]domain.Category, error)
+	GetCategoryByID(ctx context.Context, id int64) (*domain.Category, error)
+	UpdateCategory(ctx context.Context, category *domain.Category) error
+	DeleteCategory(ctx context.Context, id int64) error
 }
+
+var ErrInvalidId = errors.New("id should be an integer")
 
 type ErrorResponse struct {
 	Code    int      `json:"code"`
@@ -33,8 +40,9 @@ type UserHandler struct {
 }
 
 func handleServiceError(w http.ResponseWriter, err error) {
-	// only for development
+	// ----------only for development------------
 	fmt.Println(err)
+	fmt.Println(errors.Is(err, gorm.ErrDuplicatedKey))
 
 	switch {
 	case errors.Is(err, validation.EmailErr),
@@ -43,10 +51,14 @@ func handleServiceError(w http.ResponseWriter, err error) {
 		errors.Is(err, validation.EmailUnique),
 		errors.Is(err, service.PasswordInvalid),
 		errors.Is(err, gorm.ErrInvalidValue),
-		errors.Is(err, validation.PasswordSpaces):
+		errors.Is(err, validation.FieldSpaces):
 		writeError(w, http.StatusUnprocessableEntity, "Validation Error", []string{err.Error()})
+
 	case errors.Is(err, gorm.ErrRecordNotFound):
 		writeError(w, http.StatusNotFound, "Not Found", []string{err.Error()})
+
+	case errors.Is(err, gorm.ErrDuplicatedKey):
+		writeError(w, http.StatusConflict, "item already exist", []string{err.Error()})
 
 	default:
 		writeError(w, http.StatusInternalServerError, "internal server error", []string{})
@@ -55,7 +67,7 @@ func handleServiceError(w http.ResponseWriter, err error) {
 }
 
 func handleRequestError(w http.ResponseWriter, err error) {
-	// only for development
+	// ---------only for development------------
 	fmt.Println(err)
 
 	writeError(w, http.StatusBadRequest, "Bad Request", []string{err.Error()})
@@ -84,6 +96,11 @@ func NewUsersRouter(svc UserService, jwt *jwtauth.JWTAuth) chi.Router {
 		r.Use(Authenticator())
 
 		r.Get("/user/profile", h.UserProfile)
+		r.Post("/categories", h.CreateCategory)
+		r.Get("/categories", h.ListCategories)
+		r.Get("/categories/{id}", h.GetCategoryByID)
+		r.Put("/categories/{id}", h.UpdateCategory)
+		r.Delete("/categories/{id}", h.DeleteCategory)
 	})
 
 	return r

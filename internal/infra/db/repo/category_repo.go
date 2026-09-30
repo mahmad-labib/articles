@@ -8,21 +8,26 @@ import (
 	"main.go/internal/infra/db/models"
 )
 
-func (C *Core) CreateCategory(ctx context.Context, category domain.Category) error {
+func (C *Core) CreateCategory(ctx context.Context, category *domain.Category) (int64, error) {
 	Category := models.Category{
 		Name: category.Name,
+		Slug: category.Slug,
 	}
 
 	result := C.db.WithContext(ctx).Create(&Category)
 	if result.Error != nil {
-		err := fmt.Errorf("failed to create new Category with err: %w", result.Error)
-		return err
+		err := fmt.Errorf("failed to create new Category with: %w", result.Error)
+		return 0, err
 	}
 
-	return nil
+	return Category.ID, nil
 }
 
 func (C *Core) GetCategoryByID(ctx context.Context, id int64) (*domain.Category, error) {
+	if id <= 0 {
+		return nil, fmt.Errorf("invalid id: %d", id)
+	}
+
 	Category := models.Category{}
 	Item := domain.Category{}
 
@@ -52,15 +57,17 @@ func (C *Core) ListCategories(ctx context.Context, page, pageSize int) ([]domain
 		items = append(items, domain.Category{
 			ID:   category.ID,
 			Name: category.Name,
+			Slug: category.Slug,
 		})
 	}
 
 	return items, nil
 }
 
-func (C *Core) UpdateCategory(ctx context.Context, category domain.Category) error {
+func (C *Core) UpdateCategory(ctx context.Context, category *domain.Category) error {
 	Category := models.Category{
 		Name: category.Name,
+		Slug: category.Slug,
 	}
 
 	res := C.db.WithContext(ctx).Model(&models.Category{}).Where("id = ?", category.ID).Updates(Category)

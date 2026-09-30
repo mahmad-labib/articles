@@ -12,10 +12,10 @@ type ArticlesRepository interface {
 	DeleteArticle(ctx context.Context, id int64) error
 	GetArticleByID(ctx context.Context, id int64) (*domain.Article, error)
 	UpdateArticle(ctx context.Context, article domain.Article, userId int64, catId int64, tags []domain.Tag) error
-	CreateCategory(ctx context.Context, category domain.Category) error
+	CreateCategory(ctx context.Context, category *domain.Category) (int64, error)
 	GetCategoryByID(ctx context.Context, id int64) (*domain.Category, error)
 	ListCategories(ctx context.Context, page, pageSize int) ([]domain.Category, error)
-	UpdateCategory(ctx context.Context, category domain.Category) error
+	UpdateCategory(ctx context.Context, category *domain.Category) error
 	DeleteCategory(ctx context.Context, id int64) error
 	GetCategoryWithArticles(ctx context.Context, id int64) (*domain.Category, error)
 	CreateComment(ctx context.Context, comment domain.Comment, userId int64, articleId int64) error
@@ -32,6 +32,7 @@ type ArticlesRepository interface {
 
 type Validator interface {
 	ValidateUser(item *domain.User) error
+	ValidateCategory(category *domain.Category) error
 }
 
 type UserService struct {

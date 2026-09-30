@@ -16,7 +16,7 @@ func upCreateCategoriesTable(ctx context.Context, tx *sql.Tx) error {
         CREATE TABLE categories (
             id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
             slug TEXT NOT NULL UNIQUE,
-			name TEXT NOT NULL
+			name TEXT NOT NULL UNIQUE
         )
     `)
 	return err
