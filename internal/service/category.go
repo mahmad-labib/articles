@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"gorm.io/gorm"
 	"main.go/internal/domain"
@@ -18,7 +17,6 @@ func (s *UserService) CreateCategory(ctx context.Context, category *domain.Categ
 	id, err := s.repo.CreateCategory(ctx, category)
 	if err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
-			fmt.Println("in the right place")
 			return id, gorm.ErrDuplicatedKey
 		}
 		return id, err

@@ -117,3 +117,19 @@ func (v *Validator) ValidateCategory(category *domain.Category) error {
 
 	return nil
 }
+
+func (v *Validator) ValidateTag(tag *domain.Tag) error {
+	NameLen := utf8.RuneCountInString(tag.Name)
+
+	if NameLen == 0 || NameLen == 1 {
+		return fmt.Errorf("tag name %v %v", Empty, " and the min is 2")
+	}
+
+	for _, r := range tag.Name {
+		if unicode.IsSpace(r) {
+			return fmt.Errorf("Tag Name %v", FieldSpaces)
+		}
+	}
+
+	return nil
+}

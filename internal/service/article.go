@@ -28,11 +28,17 @@ type ArticlesRepository interface {
 	GetUserByEmail(ctx context.Context, Email string) (*domain.ApiUser, error)
 	GetUserByEmail_Login(ctx context.Context, Email string) (string, error)
 	GetProfile(ctx context.Context, id int64) (*domain.Profile, error)
+	CreateTag(ctx context.Context, tag *domain.Tag) (int64, error)
+	GetTagByID(ctx context.Context, id int64) (*domain.Tag, error)
+	ListTags(ctx context.Context, page, pageSize int) ([]domain.Tag, error)
+	UpdateTag(ctx context.Context, tag *domain.Tag) error
+	DeleteTag(ctx context.Context, id int64) error
 }
 
 type Validator interface {
 	ValidateUser(item *domain.User) error
 	ValidateCategory(category *domain.Category) error
+	ValidateTag(tag *domain.Tag) error
 }
 
 type UserService struct {
