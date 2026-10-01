@@ -7,7 +7,7 @@ import (
 )
 
 type ArticlesRepository interface {
-	CreateArticle(ctx context.Context, article domain.Article, userId int64, catId int64, tags []domain.Tag) error
+	CreateArticle(ctx context.Context, article domain.Article, userId int64, catId int64, tags []domain.Tag) (*domain.Article, error)
 	ListArticles(ctx context.Context, Page, PageSize int) ([]domain.Article, error)
 	DeleteArticle(ctx context.Context, id int64) error
 	GetArticleByID(ctx context.Context, id int64) (*domain.Article, error)

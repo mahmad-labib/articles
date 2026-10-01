@@ -3,7 +3,9 @@ package router
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/jwtauth/v5"
 	"main.go/internal/domain"
 )
@@ -12,7 +14,6 @@ type ArticleCreation struct {
 	Tags       []int  `json:"tags"`
 	CategoryID int    `json:"categoryId"`
 	Title      string `json:"title"`
-	Slug       string `json:"slug"`
 	Body       string `json:"body"`
 	Status     string `json:"status"`
 }
@@ -47,7 +48,6 @@ func (h *UserHandler) CreateArticle(w http.ResponseWriter, r *http.Request) {
 
 	article := domain.Article{
 		Title:  body.Title,
-		Slug:   body.Slug,
 		Body:   body.Body,
 		Status: status,
 	}
@@ -57,11 +57,36 @@ func (h *UserHandler) CreateArticle(w http.ResponseWriter, r *http.Request) {
 		tags[i] = domain.Tag{ID: int64(tagID)}
 	}
 
-	err := h.svc.CreateArticle(r.Context(), article, userID, int64(body.CategoryID), tags)
+	Article, err := h.svc.CreateArticle(r.Context(), article, userID, int64(body.CategoryID), tags)
 	if err != nil {
 		handleServiceError(w, err)
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"Article": Article,
+	})
+}
+
+func (h *UserHandler) GetArticleByID(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	val, err := strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		handleRequestError(w, ErrInvalidId)
+		return
+	}
+
+	Article, err := h.svc.GetArticleByID(r.Context(), val)
+	if err != nil {
+		handleServiceError(w, err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"Article": Article,
+	})
 }
