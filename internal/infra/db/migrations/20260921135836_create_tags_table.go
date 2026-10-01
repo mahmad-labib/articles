@@ -15,7 +15,7 @@ func upCreateTagsTable(ctx context.Context, tx *sql.Tx) error {
 	_, err := tx.ExecContext(ctx, `
         CREATE TABLE tags (
             id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-			name TEXT NOT NULL
+			name TEXT NOT NULL UNIQUE
         )
     `)
 	return err

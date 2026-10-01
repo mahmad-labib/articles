@@ -117,7 +117,7 @@ func (h *UserHandler) UpdateCategory(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
+	w.WriteHeader(http.StatusOK)
 }
 
 func (h *UserHandler) DeleteCategory(w http.ResponseWriter, r *http.Request) {

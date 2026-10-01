@@ -24,6 +24,11 @@ type UserService interface {
 	GetCategoryByID(ctx context.Context, id int64) (*domain.Category, error)
 	UpdateCategory(ctx context.Context, category *domain.Category) error
 	DeleteCategory(ctx context.Context, id int64) error
+	CreateTag(ctx context.Context, tag *domain.Tag) (int64, error)
+	ListTags(ctx context.Context, page, pageSize int) ([]domain.Tag, error)
+	GetTagByID(ctx context.Context, id int64) (*domain.Tag, error)
+	UpdateTag(ctx context.Context, tag *domain.Tag) error
+	DeleteTag(ctx context.Context, id int64) error
 }
 
 var ErrInvalidId = errors.New("id should be an integer")
@@ -101,6 +106,11 @@ func NewUsersRouter(svc UserService, jwt *jwtauth.JWTAuth) chi.Router {
 		r.Get("/categories/{id}", h.GetCategoryByID)
 		r.Put("/categories/{id}", h.UpdateCategory)
 		r.Delete("/categories/{id}", h.DeleteCategory)
+		r.Post("/tags", h.CreateTag)
+		r.Get("/tags", h.ListTags)
+		r.Get("/tags/{id}", h.GetTagByID)
+		r.Put("/tags/{id}", h.UpdateTag)
+		r.Delete("/tags/{id}", h.DeleteTag)
 	})
 
 	return r
