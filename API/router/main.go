@@ -29,6 +29,8 @@ type UserService interface {
 	GetTagByID(ctx context.Context, id int64) (*domain.Tag, error)
 	UpdateTag(ctx context.Context, tag *domain.Tag) error
 	DeleteTag(ctx context.Context, id int64) error
+	CreateArticle(ctx context.Context, article domain.Article, userId int64, catId int64, tags []domain.Tag) (*domain.Article, error)
+	GetArticleByID(ctx context.Context, id int64) (*domain.Article, error)
 }
 
 var ErrInvalidId = errors.New("id should be an integer")
@@ -59,7 +61,8 @@ func handleServiceError(w http.ResponseWriter, err error) {
 		errors.Is(err, validation.FieldSpaces):
 		writeError(w, http.StatusUnprocessableEntity, "Validation Error", []string{err.Error()})
 
-	case errors.Is(err, gorm.ErrRecordNotFound):
+	case errors.Is(err, gorm.ErrRecordNotFound),
+		errors.Is(err, gorm.ErrForeignKeyViolated):
 		writeError(w, http.StatusNotFound, "Not Found", []string{err.Error()})
 
 	case errors.Is(err, gorm.ErrDuplicatedKey):
@@ -111,6 +114,8 @@ func NewUsersRouter(svc UserService, jwt *jwtauth.JWTAuth) chi.Router {
 		r.Get("/tags/{id}", h.GetTagByID)
 		r.Put("/tags/{id}", h.UpdateTag)
 		r.Delete("/tags/{id}", h.DeleteTag)
+		r.Post("/articles", h.CreateArticle)
+		r.Get("/articles/{id}", h.GetArticleByID)
 	})
 
 	return r

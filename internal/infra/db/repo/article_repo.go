@@ -2,7 +2,9 @@ package repo
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"strings"
 
 	"gorm.io/gorm"
 	"main.go/internal/domain"
@@ -17,38 +19,52 @@ type APIArticle struct {
 	Tags     []models.Tag `gorm:"many2many:article_tags;"`
 }
 
-func (C *Core) CreateArticle(ctx context.Context, article domain.Article, userId int64, catId int64, tags []domain.Tag) error {
+func (C *Core) CreateArticle(ctx context.Context, article domain.Article, userId int64, catId int64, tags []domain.Tag) (*domain.Article, error) {
 	Article := models.Article{
 		UserID:     userId,
 		CategoryID: catId,
 		Title:      article.Title,
-		Slug:       article.Slug,
+		Slug:       strings.ToLower(article.Title),
 		Body:       article.Body,
 		Status:     string(article.Status),
 	}
 
-	Tags := []models.Tag{}
-	for _, t := range tags {
-		Tags = append(Tags, models.Tag{ID: t.ID})
-	}
-
 	result := C.db.WithContext(ctx).Create(&Article)
 	if result.Error != nil {
-		err := fmt.Errorf("failed to create new Article with err: %w", result.Error)
-		return err
+		if errors.Is(result.Error, gorm.ErrForeignKeyViolated) {
+			return nil, fmt.Errorf("failed to create new Article with err: category %w", gorm.ErrForeignKeyViolated)
+		}
+		return nil, fmt.Errorf("failed to create new Article with err: %w", result.Error)
 	}
 
-	if err := C.db.Model(&Article).Association("Tags").Append(Tags); err != nil {
-		return fmt.Errorf("failed to add Tags to Article with err: %w", result.Error)
+	Tags := []models.ArticleTags{}
+	for _, t := range tags {
+		err := C.db.First(&models.Tag{}, t.ID).Error
+		if err == nil {
+			Tags = append(Tags, models.ArticleTags{TagID: t.ID, ArticleID: Article.ID})
+		}
 	}
 
-	return nil
+	if Tags != nil {
+		result = C.db.WithContext(ctx).Create(&Tags)
+		if result.Error != nil {
+			err := fmt.Errorf("failed to create new ArticleTags with err: %w", result.Error)
+			return nil, err
+		}
+	}
+
+	newArticle, err := C.GetArticleByID(ctx, Article.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return newArticle, nil
 }
 
 func (C *Core) GetArticleByID(ctx context.Context, id int64) (*domain.Article, error) {
 	Article := models.Article{}
 
-	err := C.db.Preload("Comments").Preload("Tags").First(&Article, id).Error
+	err := C.db.Preload("User").Preload("Comments").Preload("Category").Preload("Tags").First(&Article, id).Error
 	if err != nil {
 		return nil, err
 	}
@@ -72,13 +88,30 @@ func (C *Core) GetArticleByID(ctx context.Context, id int64) (*domain.Article, e
 		})
 	}
 
+	category := domain.Category{
+		ID:   Article.CategoryID,
+		Name: Article.Category.Name,
+		Slug: Article.Category.Slug,
+	}
+
+	author := domain.Author{
+		ID:    Article.User.ID,
+		Name:  Article.User.Name,
+		Email: Article.User.Email,
+	}
+
 	article := domain.Article{
-		ID:       Article.ID,
-		Title:    Article.Title,
-		Slug:     Article.Slug,
-		Body:     Article.Body,
-		Comments: comments,
-		Tags:     tags,
+		ID:         Article.ID,
+		AuthorID:   Article.UserID,
+		CategoryID: Article.CategoryID,
+		Status:     domain.ArticleStatus(Article.Status),
+		Title:      Article.Title,
+		Slug:       Article.Slug,
+		Body:       Article.Body,
+		Comments:   comments,
+		Tags:       tags,
+		Category:   category,
+		Author:     author,
 	}
 
 	return &article, nil
@@ -126,6 +159,7 @@ func (C *Core) ListArticles(ctx context.Context, Page, PageSize int) ([]domain.A
 		Preload("Tags").
 		Preload("Category").
 		Preload("Author").
+		Where("status = ?", "published").
 		Find(&Articles).Error
 	if err != nil {
 		return nil, err
@@ -150,7 +184,7 @@ func (C *Core) ListArticles(ctx context.Context, Page, PageSize int) ([]domain.A
 				ID:   a.Category.ID,
 				Name: a.Category.Name,
 			},
-			Author: domain.ApiUser{
+			Author: domain.Author{
 				ID:   a.Author.ID,
 				Name: a.Author.Name,
 			},

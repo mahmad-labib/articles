@@ -24,5 +24,5 @@ type Article struct {
 	Comments []Comment
 	Tags     []Tag
 	Category Category
-	Author   ApiUser
+	Author   Author
 }

@@ -26,7 +26,7 @@ func upCreateArticlesTable(ctx context.Context, tx *sql.Tx) error {
             created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
             deleted_at TIMESTAMPTZ NULL,
 
-            CONSTRAINT fk_articles_author
+            CONSTRAINT fk_articles_user
                 FOREIGN KEY (user_id) REFERENCES users(id),
 
             CONSTRAINT fk_articles_category
