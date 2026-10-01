@@ -27,19 +27,23 @@ func (C *Core) CreateArticle(ctx context.Context, article domain.Article, userId
 		Status:     string(article.Status),
 	}
 
-	Tags := []models.Tag{}
-	for _, t := range tags {
-		Tags = append(Tags, models.Tag{ID: t.ID})
-	}
-
 	result := C.db.WithContext(ctx).Create(&Article)
 	if result.Error != nil {
 		err := fmt.Errorf("failed to create new Article with err: %w", result.Error)
 		return err
 	}
 
-	if err := C.db.Model(&Article).Association("Tags").Append(Tags); err != nil {
-		return fmt.Errorf("failed to add Tags to Article with err: %w", result.Error)
+	Tags := []models.ArticleTags{}
+	for _, t := range tags {
+		Tags = append(Tags, models.ArticleTags{TagID: t.ID, ArticleID: Article.ID})
+	}
+
+	if Tags != nil {
+		result = C.db.WithContext(ctx).Create(&Tags)
+		if result.Error != nil {
+			err := fmt.Errorf("failed to create new ArticleTags with err: %w", result.Error)
+			return err
+		}
 	}
 
 	return nil
@@ -126,6 +130,7 @@ func (C *Core) ListArticles(ctx context.Context, Page, PageSize int) ([]domain.A
 		Preload("Tags").
 		Preload("Category").
 		Preload("Author").
+		Where("status = ?", "published").
 		Find(&Articles).Error
 	if err != nil {
 		return nil, err
