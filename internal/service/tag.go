@@ -19,6 +19,7 @@ func (s *UserService) CreateTag(ctx context.Context, tag *domain.Tag) (int64, er
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			return 0, gorm.ErrDuplicatedKey
 		}
+
 		return 0, err
 	}
 
@@ -54,6 +55,7 @@ func (s *UserService) UpdateTag(ctx context.Context, tag *domain.Tag) error {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			return gorm.ErrDuplicatedKey
 		}
+
 		return err
 	}
 

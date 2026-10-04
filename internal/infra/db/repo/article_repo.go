@@ -34,10 +34,12 @@ func (C *Core) CreateArticle(ctx context.Context, article domain.Article, userId
 		if errors.Is(result.Error, gorm.ErrForeignKeyViolated) {
 			return nil, fmt.Errorf("failed to create new Article with err: category %w", gorm.ErrForeignKeyViolated)
 		}
+
 		return nil, fmt.Errorf("failed to create new Article with err: %w", result.Error)
 	}
 
 	Tags := []models.ArticleTags{}
+
 	for _, t := range tags {
 		err := C.db.First(&models.Tag{}, t.ID).Error
 		if err == nil {
@@ -49,6 +51,7 @@ func (C *Core) CreateArticle(ctx context.Context, article domain.Article, userId
 		result = C.db.WithContext(ctx).Create(&Tags)
 		if result.Error != nil {
 			err := fmt.Errorf("failed to create new ArticleTags with err: %w", result.Error)
+
 			return nil, err
 		}
 	}
@@ -154,6 +157,7 @@ func (C *Core) DeleteArticle(ctx context.Context, id int64) error {
 
 func (C *Core) ListArticles(ctx context.Context, Page, PageSize int) ([]domain.Article, error) {
 	var Articles []APIArticle
+
 	err := C.db.
 		Scopes(Paginate(Page, PageSize)).
 		Preload("Tags").
@@ -167,7 +171,6 @@ func (C *Core) ListArticles(ctx context.Context, Page, PageSize int) ([]domain.A
 
 	articles := make([]domain.Article, 0, len(Articles))
 	for _, a := range Articles {
-
 		tags := make([]domain.Tag, 0, len(a.Tags))
 		for _, tag := range a.Tags {
 			tags = append(tags, domain.Tag{

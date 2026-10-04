@@ -27,6 +27,7 @@ func CreateTestDB(t *testing.T) (*sql.DB, *gorm.DB) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	_, err = adminDB.Exec(`DROP DATABASE if exists test_db_service`)
 
 	if err := adminDB.Ping(); err != nil {
@@ -63,18 +64,23 @@ func Test_User(t *testing.T) {
 	if !test.Migrator().HasTable("users") {
 		t.Fatal("expected users table got nil")
 	}
+
 	if !test.Migrator().HasTable("articles") {
 		t.Fatal("expected articles table got nil")
 	}
+
 	if !test.Migrator().HasTable("categories") {
 		t.Fatal("expected categories table got nil")
 	}
+
 	if !test.Migrator().HasTable("comments") {
 		t.Fatal("expected comments table got nil")
 	}
+
 	if !test.Migrator().HasTable("tags") {
 		t.Fatal("expected tags table got nil")
 	}
+
 	if !test.Migrator().HasTable("article_tags") {
 		t.Fatal("expected article_tags table got nil")
 	}
@@ -95,6 +101,7 @@ func Test_User(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create user with err: %v", err)
 	}
+
 	if id == 0 {
 		t.Fatalf("expected new user got nil")
 	}
@@ -108,6 +115,7 @@ func Test_User(t *testing.T) {
 	if err != nil {
 		t.Fatalf("expected no error go %v", err)
 	}
+
 	if list == nil {
 		t.Fatalf("expected a list of users got nil")
 	}
@@ -144,18 +152,23 @@ func Test_User_InvalidValues(t *testing.T) {
 	if !test.Migrator().HasTable("users") {
 		t.Fatal("expected users table got nil")
 	}
+
 	if !test.Migrator().HasTable("articles") {
 		t.Fatal("expected articles table got nil")
 	}
+
 	if !test.Migrator().HasTable("categories") {
 		t.Fatal("expected categories table got nil")
 	}
+
 	if !test.Migrator().HasTable("comments") {
 		t.Fatal("expected comments table got nil")
 	}
+
 	if !test.Migrator().HasTable("tags") {
 		t.Fatal("expected tags table got nil")
 	}
+
 	if !test.Migrator().HasTable("article_tags") {
 		t.Fatal("expected article_tags table got nil")
 	}
@@ -171,10 +184,12 @@ func Test_User_InvalidValues(t *testing.T) {
 		Email:    "user@email.com",
 		Password: "12345",
 	}
+
 	id, err := service.CreateUser(ctx, &user1)
 	if err == nil {
 		t.Fatalf("expected err got nil")
 	}
+
 	if id > 0 {
 		t.Fatalf("expected no id got %v", id)
 	}
@@ -184,10 +199,12 @@ func Test_User_InvalidValues(t *testing.T) {
 		Email:    "",
 		Password: "12345",
 	}
+
 	id, err = service.CreateUser(ctx, &user2)
 	if err == nil {
 		t.Fatalf("expected err got nil")
 	}
+
 	if id > 0 {
 		t.Fatalf("expected no id got %v", id)
 	}
@@ -197,10 +214,12 @@ func Test_User_InvalidValues(t *testing.T) {
 		Email:    "user@.com",
 		Password: "1 2345",
 	}
+
 	id, err = service.CreateUser(ctx, &user3)
 	if err == nil {
 		t.Fatalf("expected err got nil")
 	}
+
 	if id > 0 {
 		t.Fatalf("expected no id got %v", id)
 	}
@@ -210,21 +229,26 @@ func Test_User_InvalidValues(t *testing.T) {
 		Email:    "user@email.com",
 		Password: "1 2345",
 	}
+
 	id, err = service.CreateUser(ctx, &user4)
 	if err == nil {
 		t.Fatalf("expected err got nil")
 	}
+
 	if id > 0 {
 		t.Fatalf("expected no id got %v", id)
 	}
+
 	item := service.GetUserByID(ctx, 1)
 	if item != nil {
 		t.Fatalf("expected no user got %v", item)
 	}
+
 	list, err := service.ListUser(ctx, 1, 10)
 	if err != nil {
 		t.Fatalf("expected no error got %v", err)
 	}
+
 	if len(list) != 0 {
 		t.Fatalf("expected no list got %v", list)
 	}

@@ -18,6 +18,7 @@ func upCreateTagsTable(ctx context.Context, tx *sql.Tx) error {
 			name TEXT NOT NULL UNIQUE
         )
     `)
+
 	return err
 }
 
@@ -25,5 +26,6 @@ func downCreateTagsTable(ctx context.Context, tx *sql.Tx) error {
 	_, err := tx.ExecContext(ctx, `
         DROP TABLE IF EXISTS tags
     `)
+
 	return err
 }

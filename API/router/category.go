@@ -24,8 +24,10 @@ func (h *UserHandler) CreateCategory(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
+
 	if err := decoder.Decode(&body); err != nil {
 		handleRequestError(w, err)
+
 		return
 	}
 
@@ -37,6 +39,7 @@ func (h *UserHandler) CreateCategory(w http.ResponseWriter, r *http.Request) {
 	id, err := h.svc.CreateCategory(r.Context(), &category)
 	if err != nil {
 		handleServiceError(w, err)
+
 		return
 	}
 
@@ -49,14 +52,17 @@ func (h *UserHandler) ListCategories(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
+
 	if err := decoder.Decode(&body); err != nil {
 		handleRequestError(w, err)
+
 		return
 	}
 
 	list, err := h.svc.ListCategories(r.Context(), body.Page, body.PageSize)
 	if err != nil {
 		handleServiceError(w, err)
+
 		return
 	}
 
@@ -69,15 +75,18 @@ func (h *UserHandler) ListCategories(w http.ResponseWriter, r *http.Request) {
 
 func (h *UserHandler) GetCategoryByID(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
+
 	val, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		handleRequestError(w, ErrInvalidId)
+
 		return
 	}
 
 	category, err := h.svc.GetCategoryByID(r.Context(), val)
 	if err != nil {
 		handleServiceError(w, err)
+
 		return
 	}
 
@@ -93,15 +102,19 @@ func (h *UserHandler) UpdateCategory(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
+
 	if err := decoder.Decode(&body); err != nil {
 		handleRequestError(w, err)
+
 		return
 	}
 
 	id := chi.URLParam(r, "id")
+
 	val, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		handleRequestError(w, ErrInvalidId)
+
 		return
 	}
 
@@ -114,6 +127,7 @@ func (h *UserHandler) UpdateCategory(w http.ResponseWriter, r *http.Request) {
 	err = h.svc.UpdateCategory(r.Context(), &category)
 	if err != nil {
 		handleServiceError(w, err)
+
 		return
 	}
 
@@ -122,15 +136,18 @@ func (h *UserHandler) UpdateCategory(w http.ResponseWriter, r *http.Request) {
 
 func (h *UserHandler) DeleteCategory(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
+
 	val, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		handleRequestError(w, ErrInvalidId)
+
 		return
 	}
 
 	err = h.svc.DeleteCategory(r.Context(), val)
 	if err != nil {
 		handleServiceError(w, err)
+
 		return
 	}
 

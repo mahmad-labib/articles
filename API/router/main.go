@@ -71,7 +71,6 @@ func handleServiceError(w http.ResponseWriter, err error) {
 	default:
 		writeError(w, http.StatusInternalServerError, "internal server error", []string{})
 	}
-
 }
 
 func handleRequestError(w http.ResponseWriter, err error) {
@@ -131,17 +130,20 @@ func Authenticator() func(http.Handler) http.Handler {
 			if err != nil {
 				w.WriteHeader(http.StatusUnauthorized)
 				json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
+
 				return
 			}
 
 			if token == nil {
 				w.WriteHeader(http.StatusUnauthorized)
 				json.NewEncoder(w).Encode(map[string]string{"error": "unauthorized: token not found"})
+
 				return
 			}
 
 			next.ServeHTTP(w, r)
 		}
+
 		return http.HandlerFunc(hfn)
 	}
 }

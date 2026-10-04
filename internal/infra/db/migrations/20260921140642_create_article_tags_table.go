@@ -23,6 +23,7 @@ func upCreateArticleTagsTable(ctx context.Context, tx *sql.Tx) error {
 			FOREIGN KEY (tag_id) REFERENCES tags(id)
         )
     `)
+
 	return err
 }
 
@@ -30,5 +31,6 @@ func downCreateArticleTagsTable(ctx context.Context, tx *sql.Tx) error {
 	_, err := tx.ExecContext(ctx, `
 		DROP TABLE IF EXISTS article_tags
 	`)
+
 	return err
 }

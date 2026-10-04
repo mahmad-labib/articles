@@ -17,6 +17,7 @@ func (C *Core) CreateCategory(ctx context.Context, category *domain.Category) (i
 	result := C.db.WithContext(ctx).Create(&Category)
 	if result.Error != nil {
 		err := fmt.Errorf("failed to create new Category with: %w", result.Error)
+
 		return 0, err
 	}
 
@@ -106,6 +107,7 @@ func (C *Core) GetCategoryWithArticles(ctx context.Context, id int64) (*domain.C
 
 	Item.Name = Category.Name
 	Item.ID = Category.ID
+
 	Item.Articles = make([]domain.Article, 0, len(Category.Articles))
 	for _, article := range Category.Articles {
 		Item.Articles = append(Item.Articles, domain.Article{

@@ -20,6 +20,7 @@ type ArticleCreation struct {
 
 func (h *UserHandler) CreateArticle(w http.ResponseWriter, r *http.Request) {
 	var userID int64
+
 	_, claims, _ := jwtauth.FromContext(r.Context())
 	if val, ok := claims["user_id"].(float64); ok {
 		userID = int64(val)
@@ -29,8 +30,10 @@ func (h *UserHandler) CreateArticle(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
+
 	if err := decoder.Decode(&body); err != nil {
 		handleRequestError(w, err)
+
 		return
 	}
 
@@ -39,9 +42,11 @@ func (h *UserHandler) CreateArticle(w http.ResponseWriter, r *http.Request) {
 	if body.Status == "published" {
 		status = domain.ArticleStatusPublished
 	}
+
 	if body.Status == "scheduled" {
 		status = domain.ArticleStatusScheduled
 	}
+
 	if body.Status == "draft" || body.Status == "" {
 		status = domain.ArticleStatusDraft
 	}
@@ -60,6 +65,7 @@ func (h *UserHandler) CreateArticle(w http.ResponseWriter, r *http.Request) {
 	Article, err := h.svc.CreateArticle(r.Context(), article, userID, int64(body.CategoryID), tags)
 	if err != nil {
 		handleServiceError(w, err)
+
 		return
 	}
 
@@ -72,15 +78,18 @@ func (h *UserHandler) CreateArticle(w http.ResponseWriter, r *http.Request) {
 
 func (h *UserHandler) GetArticleByID(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
+
 	val, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		handleRequestError(w, ErrInvalidId)
+
 		return
 	}
 
 	Article, err := h.svc.GetArticleByID(r.Context(), val)
 	if err != nil {
 		handleServiceError(w, err)
+
 		return
 	}
 

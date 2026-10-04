@@ -16,6 +16,7 @@ func (c *Core) CreateTag(ctx context.Context, tag *domain.Tag) (int64, error) {
 	result := c.db.WithContext(ctx).Create(&Tag)
 	if result.Error != nil {
 		err := fmt.Errorf("failed to create new Tag with: %w", result.Error)
+
 		return 0, err
 	}
 
@@ -72,6 +73,7 @@ func (c *Core) UpdateTag(ctx context.Context, tag *domain.Tag) error {
 	result := c.db.WithContext(ctx).Model(&Tag).Where("id = ?", tag.ID).Updates(Tag)
 	if result.Error != nil {
 		err := fmt.Errorf("failed to update Tag with: %w", result.Error)
+
 		return err
 	}
 
@@ -84,6 +86,7 @@ func (c *Core) DeleteTag(ctx context.Context, id int64) error {
 	}
 
 	Tag := models.Tag{}
+
 	err := c.db.WithContext(ctx).First(&Tag, id).Error
 	if err != nil {
 		return fmt.Errorf("failed to find Tag with id: %d", id)

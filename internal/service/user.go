@@ -32,6 +32,7 @@ func (s *UserService) hashPass(user *domain.User) (*domain.User, error) {
 	if err != nil {
 		return user, err
 	}
+
 	user.Password = string(hash)
 
 	return user, nil
@@ -53,6 +54,7 @@ func (s *UserService) CreateUser(ctx context.Context, domUser *domain.User) (int
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			return 0, validation.EmailUnique
 		}
+
 		return 0, err
 	}
 

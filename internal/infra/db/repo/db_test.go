@@ -28,15 +28,18 @@ func envPath(t *testing.T) string {
 		if parent == dir {
 			break
 		}
+
 		dir = parent
 	}
 
 	t.Fatal("could not find .env in project tree")
+
 	return ""
 }
 
 func TestConfig_Server(t *testing.T) {
 	envPath := envPath(t)
+
 	cfg, err := config.New(envPath)
 	if err != nil {
 		t.Fatalf("expected no error got %v", err)

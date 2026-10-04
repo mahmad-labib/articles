@@ -19,6 +19,7 @@ func TestMigrations(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	_, err = adminDB.Exec(`DROP DATABASE if exists test_db_migrations`)
 
 	if err := adminDB.Ping(); err != nil {
@@ -50,18 +51,23 @@ func TestMigrations(t *testing.T) {
 	if !test.Migrator().HasTable("users") {
 		t.Fatal("expected users table got nil")
 	}
+
 	if !test.Migrator().HasTable("articles") {
 		t.Fatal("expected articles table got nil")
 	}
+
 	if !test.Migrator().HasTable("categories") {
 		t.Fatal("expected categories table got nil")
 	}
+
 	if !test.Migrator().HasTable("comments") {
 		t.Fatal("expected comments table got nil")
 	}
+
 	if !test.Migrator().HasTable("tags") {
 		t.Fatal("expected tags table got nil")
 	}
+
 	if !test.Migrator().HasTable("article_tags") {
 		t.Fatal("expected article_tags table got nil")
 	}

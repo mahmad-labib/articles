@@ -16,6 +16,7 @@ import (
 
 func main() {
 	envPath := filepath.Join(".env")
+
 	cfg, err := config.New(envPath)
 	if err != nil {
 		slog.Error(fmt.Sprintf("Failed to load config %v", err))
@@ -46,6 +47,7 @@ func main() {
 		if err := goose.Down(sqlDB, migrationDir); err != nil {
 			log.Fatal(err)
 		}
+
 		slog.Info("Rollback successful")
 	case "reset":
 		if err := goose.Reset(sqlDB, migrationDir); err != nil {
@@ -56,6 +58,7 @@ func main() {
 		if err := goose.Up(sqlDB, migrationDir); err != nil {
 			log.Fatal(err)
 		}
+
 		slog.Info("Migration successful")
 	}
 
@@ -67,6 +70,7 @@ func checkMigrationStatus() string {
 		if slices.Contains(os.Args[1:], "rollback") {
 			return "rollback"
 		}
+
 		if slices.Contains(os.Args[1:], "reset") {
 			return "reset"
 		}

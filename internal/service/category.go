@@ -19,6 +19,7 @@ func (s *UserService) CreateCategory(ctx context.Context, category *domain.Categ
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			return id, gorm.ErrDuplicatedKey
 		}
+
 		return id, err
 	}
 

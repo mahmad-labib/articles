@@ -25,6 +25,7 @@ import (
 
 func main() {
 	envPath := filepath.Join(".env")
+
 	cfg, err := config.New(envPath)
 	if err != nil {
 		slog.Error(fmt.Sprintf("Failed to load config %v", err))
@@ -89,6 +90,7 @@ func main() {
 	}()
 
 	slog.Info("Server running on", "port", cfg.Server.Port)
+
 	if err := server.ListenAndServe(); err != http.ErrServerClosed {
 		fmt.Printf("Server error: %v\n", err)
 	}

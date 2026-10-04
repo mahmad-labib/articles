@@ -37,6 +37,7 @@ func Test_Tag(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create tag with err: %v", err)
 	}
+
 	if id == 0 {
 		t.Fatalf("expected new tag got nil")
 	}
@@ -45,6 +46,7 @@ func Test_Tag(t *testing.T) {
 	if err == nil {
 		t.Fatalf("expected error got nil")
 	}
+
 	if id1 > 0 {
 		t.Fatalf("expected no tag got one")
 	}
@@ -53,6 +55,7 @@ func Test_Tag(t *testing.T) {
 	if error != nil {
 		t.Fatalf("failed to get tag with err: %v", error)
 	}
+
 	if item == nil {
 		t.Fatalf("expected a tag got nil")
 	}
@@ -61,6 +64,7 @@ func Test_Tag(t *testing.T) {
 	if err != nil {
 		t.Fatalf("expected no error go %v", err)
 	}
+
 	if list == nil {
 		t.Fatalf("expected a list of tags got nil")
 	}
@@ -108,6 +112,7 @@ func Test_Tag_Invalid(t *testing.T) {
 	if err == nil {
 		t.Fatalf("expected error got nil")
 	}
+
 	if id > 0 {
 		t.Fatalf("expected no tag got one")
 	}
@@ -116,6 +121,7 @@ func Test_Tag_Invalid(t *testing.T) {
 	if error == nil {
 		t.Fatalf("expected error got nil")
 	}
+
 	if item != nil {
 		t.Fatalf("expected no tag got one")
 	}

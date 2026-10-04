@@ -32,12 +32,15 @@ func ServerTimeout(envName string, defaultValue int) int {
 			slog.Error("Error during conversion:", "Msg", err)
 			os.Exit(1)
 		}
+
 		return valueInt
 	}
+
 	return defaultValue
 }
 
 func JWT() string {
 	value := os.Getenv("JWT_SECRET")
+
 	return value
 }

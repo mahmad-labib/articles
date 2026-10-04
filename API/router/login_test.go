@@ -85,6 +85,7 @@ func TestFullAuthFlow(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create user with err: %v", err)
 	}
+
 	if id == 0 {
 		t.Fatalf("expected new user got nil")
 	}
@@ -100,6 +101,7 @@ func TestFullAuthFlow(t *testing.T) {
 	loginBody := bytes.NewBufferString(`{"email":"user@example.com","password":"password123"}`)
 	reqLogin := httptest.NewRequest(http.MethodPost, "/users/login", loginBody)
 	reqLogin.Header.Set("Content-Type", "application/json")
+
 	recLogin := httptest.NewRecorder()
 
 	router.ServeHTTP(recLogin, reqLogin)
@@ -115,6 +117,7 @@ func TestFullAuthFlow(t *testing.T) {
 
 	reqProfile := httptest.NewRequest(http.MethodGet, "/user/profile", nil)
 	reqProfile.Header.Set("Authorization", "Bearer "+loginResp.Token)
+
 	recProfile := httptest.NewRecorder()
 
 	router.ServeHTTP(recProfile, reqProfile)

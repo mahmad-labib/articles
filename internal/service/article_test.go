@@ -39,6 +39,7 @@ func Test_Article_create(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create user with err: %v", err)
 	}
+
 	if userId == 0 {
 		t.Fatalf("expected new user got nil")
 	}
@@ -62,6 +63,7 @@ func Test_Article_create(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create category with err: %v", err)
 	}
+
 	if categoryId == 0 {
 		t.Fatalf("expected new category got nil")
 	}
@@ -70,6 +72,7 @@ func Test_Article_create(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create tag with err: %v", err)
 	}
+
 	if tagId == 0 {
 		t.Fatalf("expected new tag got nil")
 	}
@@ -78,6 +81,7 @@ func Test_Article_create(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create Article with err: %v", err)
 	}
+
 	if Article.ID == 0 {
 		t.Fatalf("expected new Article got nil")
 	}

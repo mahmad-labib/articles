@@ -24,6 +24,7 @@ func upCreateCommentsTable(ctx context.Context, tx *sql.Tx) error {
             FOREIGN KEY (user_id) REFERENCES users(id)
         )
     `)
+
 	return err
 }
 
@@ -31,5 +32,6 @@ func downCreateCommentsTable(ctx context.Context, tx *sql.Tx) error {
 	_, err := tx.ExecContext(ctx, `
 		DROP TABLE IF EXISTS comments
 	`)
+
 	return err
 }

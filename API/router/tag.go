@@ -18,8 +18,10 @@ func (h *UserHandler) CreateTag(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
+
 	if err := decoder.Decode(&body); err != nil {
 		handleRequestError(w, err)
+
 		return
 	}
 
@@ -30,6 +32,7 @@ func (h *UserHandler) CreateTag(w http.ResponseWriter, r *http.Request) {
 	id, err := h.svc.CreateTag(r.Context(), &tag)
 	if err != nil {
 		handleServiceError(w, err)
+
 		return
 	}
 
@@ -42,14 +45,17 @@ func (h *UserHandler) ListTags(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
+
 	if err := decoder.Decode(&body); err != nil {
 		handleRequestError(w, err)
+
 		return
 	}
 
 	tags, err := h.svc.ListTags(r.Context(), body.Page, body.PageSize)
 	if err != nil {
 		handleServiceError(w, err)
+
 		return
 	}
 
@@ -62,15 +68,18 @@ func (h *UserHandler) ListTags(w http.ResponseWriter, r *http.Request) {
 
 func (h *UserHandler) GetTagByID(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
+
 	val, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		handleRequestError(w, ErrInvalidId)
+
 		return
 	}
 
 	tag, err := h.svc.GetTagByID(r.Context(), val)
 	if err != nil {
 		handleServiceError(w, err)
+
 		return
 	}
 
@@ -83,9 +92,11 @@ func (h *UserHandler) GetTagByID(w http.ResponseWriter, r *http.Request) {
 
 func (h *UserHandler) UpdateTag(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
+
 	val, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		handleRequestError(w, ErrInvalidId)
+
 		return
 	}
 
@@ -93,8 +104,10 @@ func (h *UserHandler) UpdateTag(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
+
 	if err := decoder.Decode(&body); err != nil {
 		handleRequestError(w, err)
+
 		return
 	}
 
@@ -106,6 +119,7 @@ func (h *UserHandler) UpdateTag(w http.ResponseWriter, r *http.Request) {
 	err = h.svc.UpdateTag(r.Context(), &tag)
 	if err != nil {
 		handleServiceError(w, err)
+
 		return
 	}
 
@@ -114,15 +128,18 @@ func (h *UserHandler) UpdateTag(w http.ResponseWriter, r *http.Request) {
 
 func (h *UserHandler) DeleteTag(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
+
 	val, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		handleRequestError(w, ErrInvalidId)
+
 		return
 	}
 
 	err = h.svc.DeleteTag(r.Context(), val)
 	if err != nil {
 		handleServiceError(w, err)
+
 		return
 	}
 

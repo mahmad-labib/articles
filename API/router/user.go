@@ -19,8 +19,10 @@ func (a *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
+
 	if err := decoder.Decode(&body); err != nil {
 		handleRequestError(w, err)
+
 		return
 	}
 
@@ -33,6 +35,7 @@ func (a *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	id, err := a.svc.CreateUser(r.Context(), &user)
 	if err != nil {
 		handleServiceError(w, err)
+
 		return
 	}
 
@@ -42,6 +45,7 @@ func (a *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 func (a *UserHandler) UserProfile(w http.ResponseWriter, r *http.Request) {
 	var userID int64
+
 	_, claims, _ := jwtauth.FromContext(r.Context())
 
 	if val, ok := claims["user_id"].(float64); ok {
@@ -51,6 +55,7 @@ func (a *UserHandler) UserProfile(w http.ResponseWriter, r *http.Request) {
 	profile, err := a.svc.GetProfile(r.Context(), userID)
 	if err != nil {
 		handleServiceError(w, err)
+
 		return
 	}
 

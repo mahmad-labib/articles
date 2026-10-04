@@ -15,14 +15,17 @@ func (h *UserHandler) login(w http.ResponseWriter, r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
+
 	if err := decoder.Decode(&body); err != nil {
 		handleRequestError(w, err)
+
 		return
 	}
 
 	token, err := h.svc.Login(r.Context(), body.Email, body.Password, h.jwt)
 	if err != nil {
 		handleServiceError(w, err)
+
 		return
 	}
 

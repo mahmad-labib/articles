@@ -46,31 +46,34 @@ func (v *Validator) ValidateUser(item *domain.User) error {
 func (v *Validator) validateName(name string) error {
 	nameCount := utf8.RuneCountInString(name)
 	if nameCount == 0 {
-		return fmt.Errorf("name %v", Empty)
+		return fmt.Errorf("name %w", Empty)
 	}
+
 	if nameCount < 2 || nameCount > 30 {
 		return NameLength
 	}
+
 	return nil
 }
 
 func (v *Validator) ValidateEmail(email string) error {
 	for _, r := range email {
 		if unicode.IsSpace(r) {
-			return fmt.Errorf("%v email cant conatin spaces", EmailErr)
+			return fmt.Errorf("%w email cant conatin spaces", EmailErr)
 		}
 	}
 
 	if res := isValidEmail(email); !res {
-		return fmt.Errorf("invalid %v", EmailErr)
+		return fmt.Errorf("invalid %w", EmailErr)
 	}
 
 	emailCount := utf8.RuneCountInString(email)
 	if emailCount == 0 {
-		return fmt.Errorf("email %v", Empty)
+		return fmt.Errorf("email %w", Empty)
 	}
+
 	if emailCount > 100 {
-		return fmt.Errorf("%v length max is 100", EmailErr)
+		return fmt.Errorf("%w length max is 100", EmailErr)
 	}
 
 	return nil
@@ -79,12 +82,12 @@ func (v *Validator) ValidateEmail(email string) error {
 func (v *Validator) validatePassword(pass string) error {
 	passCount := utf8.RuneCountInString(pass)
 	if passCount == 0 {
-		return fmt.Errorf("password %v", Empty)
+		return fmt.Errorf("password %w", Empty)
 	}
 
 	for _, r := range pass {
 		if unicode.IsSpace(r) {
-			return fmt.Errorf("password %v", FieldSpaces)
+			return fmt.Errorf("password %w", FieldSpaces)
 		}
 	}
 
@@ -96,22 +99,22 @@ func (v *Validator) ValidateCategory(category *domain.Category) error {
 	SlugLen := utf8.RuneCountInString(category.Slug)
 
 	if NameLen == 0 || NameLen == 1 {
-		return fmt.Errorf("category name %v %v", Empty, " and the min is 2")
+		return fmt.Errorf("category name %w %v", Empty, " and the min is 2")
 	}
 
 	if SlugLen == 0 || SlugLen == 1 {
-		return fmt.Errorf("category slug %v %v", Empty, " and the min is 2")
+		return fmt.Errorf("category slug %w %v", Empty, " and the min is 2")
 	}
 
 	for _, r := range category.Name {
 		if unicode.IsSpace(r) {
-			return fmt.Errorf("Category Name %v", FieldSpaces)
+			return fmt.Errorf("Category Name %w", FieldSpaces)
 		}
 	}
 
 	for _, r := range category.Slug {
 		if unicode.IsSpace(r) {
-			return fmt.Errorf("Category Slug %v", FieldSpaces)
+			return fmt.Errorf("Category Slug %w", FieldSpaces)
 		}
 	}
 
@@ -122,12 +125,12 @@ func (v *Validator) ValidateTag(tag *domain.Tag) error {
 	NameLen := utf8.RuneCountInString(tag.Name)
 
 	if NameLen == 0 || NameLen == 1 {
-		return fmt.Errorf("tag name %v %v", Empty, " and the min is 2")
+		return fmt.Errorf("tag name %w %v", Empty, " and the min is 2")
 	}
 
 	for _, r := range tag.Name {
 		if unicode.IsSpace(r) {
-			return fmt.Errorf("Tag Name %v", FieldSpaces)
+			return fmt.Errorf("Tag Name %w", FieldSpaces)
 		}
 	}
 

@@ -19,6 +19,7 @@ func (c *Core) CreateUser(ctx context.Context, domUser *domain.User) (int64, err
 	result := c.db.WithContext(ctx).Create(&User)
 	if result.Error != nil {
 		err := fmt.Errorf("failed to create new User with err: %w", result.Error)
+
 		return 0, err
 	}
 
@@ -122,6 +123,7 @@ func (c *Core) DeleteUser(ctx context.Context, id int64) error {
 
 func (c *Core) GetProfile(ctx context.Context, id int64) (*domain.Profile, error) {
 	var user models.User
+
 	if id == 0 {
 		return nil, gorm.ErrRecordNotFound
 	}

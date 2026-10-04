@@ -26,18 +26,23 @@ func Test_Category(t *testing.T) {
 	if !test.Migrator().HasTable("users") {
 		t.Fatal("expected users table got nil")
 	}
+
 	if !test.Migrator().HasTable("articles") {
 		t.Fatal("expected articles table got nil")
 	}
+
 	if !test.Migrator().HasTable("categories") {
 		t.Fatal("expected categories table got nil")
 	}
+
 	if !test.Migrator().HasTable("comments") {
 		t.Fatal("expected comments table got nil")
 	}
+
 	if !test.Migrator().HasTable("tags") {
 		t.Fatal("expected tags table got nil")
 	}
+
 	if !test.Migrator().HasTable("article_tags") {
 		t.Fatal("expected article_tags table got nil")
 	}
@@ -57,6 +62,7 @@ func Test_Category(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create category with err: %v", err)
 	}
+
 	if id == 0 {
 		t.Fatalf("expected new category got nil")
 	}
@@ -65,6 +71,7 @@ func Test_Category(t *testing.T) {
 	if error != nil {
 		t.Fatalf("failed to get category with err: %v", error)
 	}
+
 	if item == nil {
 		t.Fatalf("expected a category got nil")
 	}
@@ -73,6 +80,7 @@ func Test_Category(t *testing.T) {
 	if err != nil {
 		t.Fatalf("expected no error go %v", err)
 	}
+
 	if list == nil {
 		t.Fatalf("expected a list of categories got nil")
 	}
@@ -109,18 +117,23 @@ func Test_CategoryInvalid(t *testing.T) {
 	if !test.Migrator().HasTable("users") {
 		t.Fatal("expected users table got nil")
 	}
+
 	if !test.Migrator().HasTable("articles") {
 		t.Fatal("expected articles table got nil")
 	}
+
 	if !test.Migrator().HasTable("categories") {
 		t.Fatal("expected categories table got nil")
 	}
+
 	if !test.Migrator().HasTable("comments") {
 		t.Fatal("expected comments table got nil")
 	}
+
 	if !test.Migrator().HasTable("tags") {
 		t.Fatal("expected tags table got nil")
 	}
+
 	if !test.Migrator().HasTable("article_tags") {
 		t.Fatal("expected article_tags table got nil")
 	}
@@ -140,6 +153,7 @@ func Test_CategoryInvalid(t *testing.T) {
 	if err == nil {
 		t.Fatalf("expected validation error but got none")
 	}
+
 	if id != 0 {
 		t.Fatalf("expected no category created but got one with ID: %d", id)
 	}
@@ -148,6 +162,7 @@ func Test_CategoryInvalid(t *testing.T) {
 	if error == nil {
 		t.Fatalf("expected validation error but got none")
 	}
+
 	if item != nil {
 		t.Fatalf("expected no category got %v", item)
 	}
