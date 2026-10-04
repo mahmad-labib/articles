@@ -5,9 +5,9 @@ import (
 )
 
 type Config struct {
-	Server Server
-	DB     DB
-	JWT    string
+	AdminServer AdminServer
+	DB          DB
+	JWT         string
 }
 
 func New(path string) (*Config, error) {
@@ -16,8 +16,8 @@ func New(path string) (*Config, error) {
 	}
 
 	return &Config{
-		Server: ServerValues(),
-		DB:     CreateDSN(),
-		JWT:    JWT(),
+		AdminServer: CreateAdminServer(),
+		DB:          CreateDSN(),
+		JWT:         JWT(),
 	}, nil
 }

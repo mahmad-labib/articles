@@ -8,10 +8,9 @@ import (
 	"path/filepath"
 	"slices"
 
+	"github.com/mahmad-labib/articles/internal/config"
+	"github.com/mahmad-labib/articles/internal/infra/db"
 	"github.com/pressly/goose/v3"
-	"main.go/internal/config"
-	_ "main.go/internal/infra/db/migrations"
-	db "main.go/internal/infra/db/repo"
 )
 
 func main() {
@@ -24,42 +23,43 @@ func main() {
 		os.Exit(1)
 	}
 
-	db, err := db.NewClient(cfg.DB.DSN)
+	conn, err := db.NewClient(cfg.DB.DSN)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	sqlDB, err := db.DB()
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer sqlDB.Close()
+	defer func() {
+		if err := db.Close(conn); err != nil {
+			log.Fatal(err)
+		}
+	}()
 
 	if err := goose.SetDialect("postgres"); err != nil {
 		log.Fatal(err)
 	}
 
+	migration, err := db.NewMigration(conn)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	status := checkMigrationStatus()
-	migrationDir := "internal/infra/db/migrations"
 
 	switch status {
 	case "rollback":
-		if err := goose.Down(sqlDB, migrationDir); err != nil {
+		if err := migration.Down(); err != nil {
 			log.Fatal(err)
 		}
 
-		slog.Info("Rollback successful")
 	case "reset":
-		if err := goose.Reset(sqlDB, migrationDir); err != nil {
+		if err := migration.Reset(); err != nil {
 			log.Fatal(err)
 		}
 
 	default:
-		if err := goose.Up(sqlDB, migrationDir); err != nil {
+		if err := migration.Up(); err != nil {
 			log.Fatal(err)
 		}
-
-		slog.Info("Migration successful")
 	}
 
 	slog.Info("Migration successful")
