@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/go-chi/jwtauth/v5"
 	"github.com/mahmad-labib/articles/internal/domain"
@@ -46,7 +47,7 @@ var (
 func (s *UserService) GetUserByEmail(ctx context.Context, Email string) (*domain.ApiUser, error) {
 	user, err := s.repo.GetUserByEmail(ctx, Email)
 	if err != nil {
-		return nil, gorm.ErrRecordNotFound
+		return nil, fmt.Errorf("%v %v", validation.NotFoundErr, gorm.ErrRecordNotFound)
 	}
 
 	return user, nil
@@ -80,7 +81,7 @@ func (s *UserService) CreateUser(ctx context.Context, domUser *domain.User) (int
 	id, err := s.repo.CreateUser(ctx, domUser)
 	if err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
-			return 0, validation.EmailUnique
+			return 0, fmt.Errorf("%v this email already exist", validation.Validation)
 		}
 
 		return 0, err
@@ -116,17 +117,17 @@ func (s *UserService) DeleteUser(ctx context.Context, Id int64) error {
 func (s *UserService) Login(ctx context.Context, email, password string, jwt *jwtauth.JWTAuth) (string, error) {
 	user, err := s.repo.GetUserByEmail(ctx, email)
 	if err != nil {
-		return "", gorm.ErrRecordNotFound
+		return "", fmt.Errorf("%v %v", validation.NotFoundErr, gorm.ErrRecordNotFound)
 	}
 
 	userPass, err := s.repo.GetUserByEmail_Login(ctx, email)
 	if err != nil {
-		return "", gorm.ErrRecordNotFound
+		return "", fmt.Errorf("%v %v", validation.NotFoundErr, gorm.ErrRecordNotFound)
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(userPass), []byte(password))
 	if err != nil {
-		return "", PasswordInvalid
+		return "", fmt.Errorf("%v %v", validation.Validation, PasswordInvalid)
 	}
 
 	_, token, err := jwt.Encode(map[string]interface{}{
@@ -142,7 +143,7 @@ func (s *UserService) Login(ctx context.Context, email, password string, jwt *jw
 
 func (s *UserService) GetProfile(ctx context.Context, id int64) (*domain.Profile, error) {
 	if id == 0 {
-		return nil, gorm.ErrInvalidValue
+		return nil, fmt.Errorf("%v %v", validation.Validation, gorm.ErrInvalidValue)
 	}
 
 	user, err := s.repo.GetProfile(ctx, id)

@@ -52,9 +52,11 @@ func (h *Handler) CreateArticle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	article := domain.Article{
-		Title:  body.Title,
-		Body:   body.Body,
-		Status: status,
+		Title:      body.Title,
+		Body:       body.Body,
+		Status:     status,
+		CategoryID: int64(body.CategoryID),
+		AuthorID:   userID,
 	}
 
 	tags := make([]domain.Tag, len(body.Tags))
@@ -62,7 +64,7 @@ func (h *Handler) CreateArticle(w http.ResponseWriter, r *http.Request) {
 		tags[i] = domain.Tag{ID: int64(tagID)}
 	}
 
-	Article, err := h.asvc.CreateArticle(r.Context(), article, userID, int64(body.CategoryID), tags)
+	Article, err := h.asvc.CreateArticle(r.Context(), article, tags)
 	if err != nil {
 		handleServiceError(w, err)
 

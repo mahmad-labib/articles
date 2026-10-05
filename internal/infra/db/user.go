@@ -128,7 +128,11 @@ func (r *Repository) GetProfile(ctx context.Context, id int64) (*domain.Profile,
 		return nil, gorm.ErrRecordNotFound
 	}
 
-	err := r.db.Preload("Articles").Find(&user, &models.User{ID: id}).Error
+	err := r.db.
+		Preload("Articles", func(db *gorm.DB) *gorm.DB {
+			return db.Select("id", "user_id")
+		}).
+		Find(&user, &models.User{ID: id}).Error
 	if err != nil {
 		return nil, err
 	}

@@ -19,22 +19,22 @@ func (v *CategoryValidator) Validate(category *domain.Category) error {
 	SlugLen := utf8.RuneCountInString(category.Slug)
 
 	if NameLen == 0 || NameLen == 1 {
-		return fmt.Errorf("category name %w %v", Empty, " and the min is 2")
+		return fmt.Errorf("%v category name the min char is 2", Validation)
 	}
 
 	if SlugLen == 0 || SlugLen == 1 {
-		return fmt.Errorf("category slug %w %v", Empty, " and the min is 2")
+		return fmt.Errorf("%v category slug the min char is 2", Validation)
 	}
 
 	for _, r := range category.Name {
 		if unicode.IsSpace(r) {
-			return fmt.Errorf("Category Name %w", FieldSpaces)
+			return fmt.Errorf("%v Category Name spaces are not allowed", Validation)
 		}
 	}
 
 	for _, r := range category.Slug {
 		if unicode.IsSpace(r) {
-			return fmt.Errorf("Category Slug %w", FieldSpaces)
+			return fmt.Errorf("%v Category Slug spaces are not allowed", Validation)
 		}
 	}
 

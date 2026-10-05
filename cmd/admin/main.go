@@ -125,7 +125,9 @@ func loadTagService(repository *db.Repository) *service.TagService {
 }
 
 func loadArticleService(repository *db.Repository) *service.ArticleService {
-	service := service.NewArticleService(repository)
+	articleValidator := validation.NewArticleValidator()
+
+	service := service.NewArticleService(repository, articleValidator)
 
 	return service
 }

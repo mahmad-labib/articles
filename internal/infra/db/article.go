@@ -19,10 +19,10 @@ type APIArticle struct {
 	Tags     []models.Tag `gorm:"many2many:article_tags;"`
 }
 
-func (r *Repository) CreateArticle(ctx context.Context, article domain.Article, userId int64, catId int64, tags []domain.Tag) (*domain.Article, error) {
+func (r *Repository) CreateArticle(ctx context.Context, article domain.Article, tags []domain.Tag) (*domain.Article, error) {
 	Article := models.Article{
-		UserID:     userId,
-		CategoryID: catId,
+		UserID:     article.AuthorID,
+		CategoryID: article.CategoryID,
 		Title:      article.Title,
 		Slug:       strings.ToLower(article.Title),
 		Body:       article.Body,
@@ -47,7 +47,7 @@ func (r *Repository) CreateArticle(ctx context.Context, article domain.Article, 
 		}
 	}
 
-	if Tags != nil {
+	if len(Tags) > 0 {
 		result = r.db.WithContext(ctx).Create(&Tags)
 		if result.Error != nil {
 			err := fmt.Errorf("failed to create new ArticleTags with err: %w", result.Error)
@@ -67,7 +67,7 @@ func (r *Repository) CreateArticle(ctx context.Context, article domain.Article, 
 func (r *Repository) GetArticleByID(ctx context.Context, id int64) (*domain.Article, error) {
 	Article := models.Article{}
 
-	err := r.db.Preload("User").Preload("Comments").Preload("Category").Preload("Tags").First(&Article, id).Error
+	err := r.db.Preload("Comments").Preload("Tags").First(&Article, id).Error
 	if err != nil {
 		return nil, err
 	}
@@ -91,18 +91,6 @@ func (r *Repository) GetArticleByID(ctx context.Context, id int64) (*domain.Arti
 		})
 	}
 
-	category := domain.Category{
-		ID:   Article.CategoryID,
-		Name: Article.Category.Name,
-		Slug: Article.Category.Slug,
-	}
-
-	author := domain.Author{
-		ID:    Article.User.ID,
-		Name:  Article.User.Name,
-		Email: Article.User.Email,
-	}
-
 	article := domain.Article{
 		ID:         Article.ID,
 		AuthorID:   Article.UserID,
@@ -113,21 +101,19 @@ func (r *Repository) GetArticleByID(ctx context.Context, id int64) (*domain.Arti
 		Body:       Article.Body,
 		Comments:   comments,
 		Tags:       tags,
-		Category:   category,
-		Author:     author,
 	}
 
 	return &article, nil
 }
 
-func (r *Repository) UpdateArticle(ctx context.Context, article domain.Article, userId int64, catId int64, tags []domain.Tag) error {
+func (r *Repository) UpdateArticle(ctx context.Context, article domain.Article, tags []domain.Tag) error {
 	Article := models.Article{
 		ID:         article.ID,
 		Title:      article.Title,
 		Slug:       article.Slug,
 		Body:       article.Body,
 		Status:     string(article.Status),
-		CategoryID: catId,
+		CategoryID: article.CategoryID,
 	}
 
 	res := r.db.WithContext(ctx).Model(&models.Article{}).Where("id = ?", article.ID).Updates(Article)
@@ -183,14 +169,6 @@ func (r *Repository) ListArticles(ctx context.Context, Page, PageSize int) ([]do
 			ID:    a.ID,
 			Title: a.Title,
 			Tags:  tags,
-			Category: domain.Category{
-				ID:   a.Category.ID,
-				Name: a.Category.Name,
-			},
-			Author: domain.Author{
-				ID:   a.Author.ID,
-				Name: a.Author.Name,
-			},
 		}
 		articles = append(articles, article)
 	}

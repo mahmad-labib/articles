@@ -30,7 +30,7 @@ type TagService interface {
 }
 
 type ArticleService interface {
-	CreateArticle(ctx context.Context, article domain.Article, userId int64, catId int64, tags []domain.Tag) (*domain.Article, error)
+	CreateArticle(ctx context.Context, article domain.Article, tags []domain.Tag) (*domain.Article, error)
 	GetArticleByID(ctx context.Context, id int64) (*domain.Article, error)
 }
 
