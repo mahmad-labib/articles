@@ -6,16 +6,16 @@ import (
 	"strconv"
 )
 
-type Server struct {
+type AdminServer struct {
 	Port         string
 	ReadTimeout  int
 	WriteTimeout int
 	IdleTimeout  int
 }
 
-func ServerValues() Server {
-	initServer := Server{}
-	initServer.Port = os.Getenv("PORT")
+func CreateAdminServer() AdminServer {
+	initServer := AdminServer{}
+	initServer.Port = os.Getenv("ADMIN_PORT")
 
 	initServer.ReadTimeout = ServerTimeout("ReadTimeout", 5)
 	initServer.WriteTimeout = ServerTimeout("WriteTimeout", 10)
@@ -32,12 +32,15 @@ func ServerTimeout(envName string, defaultValue int) int {
 			slog.Error("Error during conversion:", "Msg", err)
 			os.Exit(1)
 		}
+
 		return valueInt
 	}
+
 	return defaultValue
 }
 
 func JWT() string {
 	value := os.Getenv("JWT_SECRET")
+
 	return value
 }

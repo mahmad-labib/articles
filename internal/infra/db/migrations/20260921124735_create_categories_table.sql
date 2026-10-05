@@ -1,0 +1,9 @@
+-- +goose Up
+CREATE TABLE IF NOT EXISTS categories (
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    slug TEXT NOT NULL UNIQUE,
+    name TEXT NOT NULL UNIQUE
+);
+
+-- +goose Down
+DROP TABLE IF EXISTS categories;

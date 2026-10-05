@@ -1,4 +1,4 @@
-module main.go
+module github.com/mahmad-labib/articles
 
 go 1.26.5
 

@@ -5,11 +5,39 @@ import (
 	"errors"
 
 	"github.com/go-chi/jwtauth/v5"
+	"github.com/mahmad-labib/articles/internal/domain"
+	"github.com/mahmad-labib/articles/internal/service/validation"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
-	"main.go/internal/domain"
-	"main.go/internal/service/validation"
 )
+
+type UserRepository interface {
+	GetUserByID(ctx context.Context, ID int64) *domain.ApiUser
+	UpdateUser(ctx context.Context, domUser *domain.ApiUser) error
+	ListUser(ctx context.Context, Page, PageSize int) ([]domain.ApiUser, error)
+	DeleteUser(ctx context.Context, ID int64) error
+	GetUserByEmail(ctx context.Context, Email string) (*domain.ApiUser, error)
+	GetUserByEmail_Login(ctx context.Context, Email string) (string, error)
+	GetProfile(ctx context.Context, id int64) (*domain.Profile, error)
+	CreateUser(ctx context.Context, domUser *domain.User) (int64, error)
+}
+
+type UserValidator interface {
+	Validate(item *domain.User) error
+	ValidateEmail(email string) error
+}
+
+type UserService struct {
+	repo      UserRepository
+	validator UserValidator
+}
+
+func NewUserService(repo UserRepository, validator UserValidator) *UserService {
+	return &UserService{
+		repo:      repo,
+		validator: validator,
+	}
+}
 
 var (
 	PasswordInvalid = errors.New("password is not correct")
@@ -32,13 +60,14 @@ func (s *UserService) hashPass(user *domain.User) (*domain.User, error) {
 	if err != nil {
 		return user, err
 	}
+
 	user.Password = string(hash)
 
 	return user, nil
 }
 
 func (s *UserService) CreateUser(ctx context.Context, domUser *domain.User) (int64, error) {
-	err := s.validator.ValidateUser(domUser)
+	err := s.validator.Validate(domUser)
 	if err != nil {
 		return 0, err
 	}
@@ -53,6 +82,7 @@ func (s *UserService) CreateUser(ctx context.Context, domUser *domain.User) (int
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
 			return 0, validation.EmailUnique
 		}
+
 		return 0, err
 	}
 

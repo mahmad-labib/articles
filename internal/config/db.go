@@ -18,5 +18,6 @@ func CreateDSN() DB {
 
 	DB_options := DB{}
 	DB_options.DSN = fmt.Sprintf("postgres://%s:%s@%v:%s/%s", DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, DB_NAME)
+
 	return DB_options
 }
