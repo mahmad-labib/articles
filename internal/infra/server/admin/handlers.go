@@ -34,4 +34,6 @@ type ArticleHandler interface {
 	GetArticleByID(w http.ResponseWriter, r *http.Request)
 	ListPublishedArticles(w http.ResponseWriter, r *http.Request)
 	ListProfileArticles(w http.ResponseWriter, r *http.Request)
+	UpdateArticle(w http.ResponseWriter, r *http.Request)
+	DeleteArticle(w http.ResponseWriter, r *http.Request)
 }

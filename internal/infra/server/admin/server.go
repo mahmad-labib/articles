@@ -74,6 +74,8 @@ func v1routers(jwt *jwtauth.JWTAuth, h Handler) chi.Router {
 			r.Post("/articles", h.CreateArticle)
 			r.Get("/articles/{id}", h.GetArticleByID)
 			r.Get("/articles", h.ListPublishedArticles)
+			r.Put("/articles/{id}", h.UpdateArticle)
+			r.Delete("/articles/{id}", h.DeleteArticle)
 		})
 	})
 
