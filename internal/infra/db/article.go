@@ -19,10 +19,18 @@ type APIArticle struct {
 	Tags     []models.Tag `gorm:"many2many:article_tags;"`
 }
 
-func (r *Repository) CreateArticle(ctx context.Context, article domain.Article, userId int64, catId int64, tags []domain.Tag) (*domain.Article, error) {
+type ArticleFilter struct {
+	CategoryID int64 `json:"category_id"`
+	TagID      int64 `json:"tag_id"`
+	AuthorID   int64 `json:"author_id"`
+	Page       int   `json:"Page"`
+	PageSize   int   `json:"pageSize"`
+}
+
+func (r *Repository) CreateArticle(ctx context.Context, article domain.Article, tags []domain.Tag) (*domain.Article, error) {
 	Article := models.Article{
-		UserID:     userId,
-		CategoryID: catId,
+		UserID:     article.AuthorID,
+		CategoryID: article.CategoryID,
 		Title:      article.Title,
 		Slug:       strings.ToLower(article.Title),
 		Body:       article.Body,
@@ -47,7 +55,7 @@ func (r *Repository) CreateArticle(ctx context.Context, article domain.Article, 
 		}
 	}
 
-	if Tags != nil {
+	if len(Tags) > 0 {
 		result = r.db.WithContext(ctx).Create(&Tags)
 		if result.Error != nil {
 			err := fmt.Errorf("failed to create new ArticleTags with err: %w", result.Error)
@@ -67,7 +75,7 @@ func (r *Repository) CreateArticle(ctx context.Context, article domain.Article, 
 func (r *Repository) GetArticleByID(ctx context.Context, id int64) (*domain.Article, error) {
 	Article := models.Article{}
 
-	err := r.db.Preload("User").Preload("Comments").Preload("Category").Preload("Tags").First(&Article, id).Error
+	err := r.db.Preload("Comments").Preload("Tags").First(&Article, id).Error
 	if err != nil {
 		return nil, err
 	}
@@ -91,18 +99,6 @@ func (r *Repository) GetArticleByID(ctx context.Context, id int64) (*domain.Arti
 		})
 	}
 
-	category := domain.Category{
-		ID:   Article.CategoryID,
-		Name: Article.Category.Name,
-		Slug: Article.Category.Slug,
-	}
-
-	author := domain.Author{
-		ID:    Article.User.ID,
-		Name:  Article.User.Name,
-		Email: Article.User.Email,
-	}
-
 	article := domain.Article{
 		ID:         Article.ID,
 		AuthorID:   Article.UserID,
@@ -113,21 +109,19 @@ func (r *Repository) GetArticleByID(ctx context.Context, id int64) (*domain.Arti
 		Body:       Article.Body,
 		Comments:   comments,
 		Tags:       tags,
-		Category:   category,
-		Author:     author,
 	}
 
 	return &article, nil
 }
 
-func (r *Repository) UpdateArticle(ctx context.Context, article domain.Article, userId int64, catId int64, tags []domain.Tag) error {
+func (r *Repository) UpdateArticle(ctx context.Context, article domain.Article, tags []domain.Tag) error {
 	Article := models.Article{
 		ID:         article.ID,
 		Title:      article.Title,
 		Slug:       article.Slug,
 		Body:       article.Body,
 		Status:     string(article.Status),
-		CategoryID: catId,
+		CategoryID: article.CategoryID,
 	}
 
 	res := r.db.WithContext(ctx).Model(&models.Article{}).Where("id = ?", article.ID).Updates(Article)
@@ -155,14 +149,13 @@ func (r *Repository) DeleteArticle(ctx context.Context, id int64) error {
 	return nil
 }
 
-func (r *Repository) ListArticles(ctx context.Context, Page, PageSize int) ([]domain.Article, error) {
-	var Articles []APIArticle
+func (r *Repository) ListPublishedArticles(ctx context.Context, filter ArticleFilter) ([]domain.Article, error) {
+	var Articles []models.Article
 
 	err := r.db.
-		Scopes(Paginate(Page, PageSize)).
-		Preload("Tags").
-		Preload("Category").
-		Preload("Author").
+		Scopes(Paginate(filter.Page, filter.PageSize)).
+		Scopes(Filter(filter)).
+		Preload("User").
 		Where("status = ?", "published").
 		Find(&Articles).Error
 	if err != nil {
@@ -180,17 +173,49 @@ func (r *Repository) ListArticles(ctx context.Context, Page, PageSize int) ([]do
 		}
 
 		article := domain.Article{
-			ID:    a.ID,
-			Title: a.Title,
-			Tags:  tags,
-			Category: domain.Category{
-				ID:   a.Category.ID,
-				Name: a.Category.Name,
-			},
-			Author: domain.Author{
-				ID:   a.Author.ID,
-				Name: a.Author.Name,
-			},
+			ID:         a.ID,
+			Title:      a.Title,
+			Tags:       tags,
+			Slug:       a.Slug,
+			CategoryID: a.CategoryID,
+			AuthorID:   a.UserID,
+		}
+		articles = append(articles, article)
+	}
+
+	return articles, nil
+}
+
+func (r *Repository) ListProfileArticles(ctx context.Context, id int64, Page, PageSize int) ([]domain.Article, error) {
+	var Articles []models.Article
+
+	err := r.db.
+		Scopes(Paginate(Page, PageSize)).
+		Preload("Tags").
+		Preload("User").
+		Where("user_id = ?", id).
+		Find(&Articles).Error
+	if err != nil {
+		return nil, err
+	}
+
+	articles := make([]domain.Article, 0, len(Articles))
+	for _, a := range Articles {
+		tags := make([]domain.Tag, 0, len(a.Tags))
+		for _, tag := range a.Tags {
+			tags = append(tags, domain.Tag{
+				ID:   tag.ID,
+				Name: tag.Name,
+			})
+		}
+
+		article := domain.Article{
+			ID:         a.ID,
+			Title:      a.Title,
+			Slug:       a.Slug,
+			Tags:       tags,
+			CategoryID: a.CategoryID,
+			AuthorID:   a.UserID,
 		}
 		articles = append(articles, article)
 	}

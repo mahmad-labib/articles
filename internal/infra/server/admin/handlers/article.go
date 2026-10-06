@@ -8,6 +8,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/jwtauth/v5"
 	"github.com/mahmad-labib/articles/internal/domain"
+	"github.com/mahmad-labib/articles/internal/infra/db"
 )
 
 type ArticleCreation struct {
@@ -52,9 +53,11 @@ func (h *Handler) CreateArticle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	article := domain.Article{
-		Title:  body.Title,
-		Body:   body.Body,
-		Status: status,
+		Title:      body.Title,
+		Body:       body.Body,
+		Status:     status,
+		CategoryID: int64(body.CategoryID),
+		AuthorID:   userID,
 	}
 
 	tags := make([]domain.Tag, len(body.Tags))
@@ -62,7 +65,7 @@ func (h *Handler) CreateArticle(w http.ResponseWriter, r *http.Request) {
 		tags[i] = domain.Tag{ID: int64(tagID)}
 	}
 
-	Article, err := h.asvc.CreateArticle(r.Context(), article, userID, int64(body.CategoryID), tags)
+	Article, err := h.asvc.CreateArticle(r.Context(), article, tags)
 	if err != nil {
 		handleServiceError(w, err)
 
@@ -97,5 +100,64 @@ func (h *Handler) GetArticleByID(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"Article": Article,
+	})
+}
+
+func (h *Handler) ListPublishedArticles(w http.ResponseWriter, r *http.Request) {
+	var filter db.ArticleFilter
+
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+
+	if err := decoder.Decode(&filter); err != nil {
+		handleRequestError(w, err)
+
+		return
+	}
+
+	articles, err := h.asvc.ListPublishedArticles(r.Context(), filter)
+	if err != nil {
+		handleServiceError(w, err)
+
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"articles": articles,
+	})
+}
+
+func (h *Handler) ListProfileArticles(w http.ResponseWriter, r *http.Request) {
+	var userID int64
+
+	_, claims, _ := jwtauth.FromContext(r.Context())
+	if val, ok := claims["user_id"].(float64); ok {
+		userID = int64(val)
+	}
+
+	var body Pagination
+
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+
+	if err := decoder.Decode(&body); err != nil {
+		handleRequestError(w, err)
+
+		return
+	}
+
+	articles, err := h.asvc.ListProfileArticles(r.Context(), userID, body.Page, body.PageSize)
+	if err != nil {
+		handleServiceError(w, err)
+
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"artilces": articles,
 	})
 }

@@ -32,4 +32,6 @@ type TagHandler interface {
 type ArticleHandler interface {
 	CreateArticle(w http.ResponseWriter, r *http.Request)
 	GetArticleByID(w http.ResponseWriter, r *http.Request)
+	ListPublishedArticles(w http.ResponseWriter, r *http.Request)
+	ListProfileArticles(w http.ResponseWriter, r *http.Request)
 }

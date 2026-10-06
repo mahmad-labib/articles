@@ -15,8 +15,9 @@ type CategoryCreation struct {
 }
 
 type Pagination struct {
-	Page     int `json:"page"`
-	PageSize int `json:"pageSize"`
+	Page     int    `json:"page"`
+	PageSize int    `json:"pageSize"`
+	Filter   string `json:"filter"`
 }
 
 func (h *Handler) CreateCategory(w http.ResponseWriter, r *http.Request) {

@@ -20,6 +20,6 @@ type ApiUser struct {
 }
 
 type Profile struct {
-	User     User
-	Articles []Article
+	Author         Author
+	ProfileArticle []ProfileArticle
 }

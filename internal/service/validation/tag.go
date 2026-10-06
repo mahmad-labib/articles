@@ -18,12 +18,12 @@ func (v *TagValidator) Validate(tag *domain.Tag) error {
 	NameLen := utf8.RuneCountInString(tag.Name)
 
 	if NameLen == 0 || NameLen == 1 {
-		return fmt.Errorf("tag name %w %v", Empty, " and the min is 2")
+		return fmt.Errorf("%w tag name min charachters is 2", Validation)
 	}
 
 	for _, r := range tag.Name {
 		if unicode.IsSpace(r) {
-			return fmt.Errorf("Tag Name %w", FieldSpaces)
+			return fmt.Errorf("%w Tag Name spaces are not allowed", Validation)
 		}
 	}
 

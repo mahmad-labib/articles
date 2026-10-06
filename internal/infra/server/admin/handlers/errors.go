@@ -5,7 +5,6 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/mahmad-labib/articles/internal/service"
 	"github.com/mahmad-labib/articles/internal/service/validation"
 	"gorm.io/gorm"
 )
@@ -20,24 +19,16 @@ type ErrorResponse struct {
 
 func handleServiceError(w http.ResponseWriter, err error) {
 	switch {
-	case errors.Is(err, validation.EmailErr),
-		errors.Is(err, validation.Empty),
-		errors.Is(err, validation.NameLength),
-		errors.Is(err, validation.EmailUnique),
-		errors.Is(err, service.PasswordInvalid),
-		errors.Is(err, gorm.ErrInvalidValue),
-		errors.Is(err, validation.FieldSpaces):
-		writeError(w, http.StatusUnprocessableEntity, "Validation Error", []string{err.Error()})
+	case
+		errors.Is(err, validation.Validation):
+		writeError(w, http.StatusUnprocessableEntity, "Validation", []string{err.Error()})
 
-	case errors.Is(err, gorm.ErrRecordNotFound),
+	case errors.Is(err, validation.NotFoundErr),
 		errors.Is(err, gorm.ErrForeignKeyViolated):
 		writeError(w, http.StatusNotFound, "Not Found", []string{err.Error()})
 
-	case errors.Is(err, gorm.ErrDuplicatedKey):
-		writeError(w, http.StatusConflict, "item already exist", []string{err.Error()})
-
 	default:
-		writeError(w, http.StatusInternalServerError, "internal server error", []string{})
+		writeError(w, http.StatusInternalServerError, "internal server error", []string{err.Error()})
 	}
 }
 

@@ -54,6 +54,7 @@ func v1routers(jwt *jwtauth.JWTAuth, h Handler) chi.Router {
 		r.Route("/admin", func(r chi.Router) {
 			// user routes
 			r.Get("/user/profile", h.UserProfile)
+			r.Get("/user/profile/articles", h.ListProfileArticles)
 
 			// category routes
 			r.Post("/categories", h.CreateCategory)
@@ -72,6 +73,7 @@ func v1routers(jwt *jwtauth.JWTAuth, h Handler) chi.Router {
 			// article routes
 			r.Post("/articles", h.CreateArticle)
 			r.Get("/articles/{id}", h.GetArticleByID)
+			r.Get("/articles", h.ListPublishedArticles)
 		})
 	})
 

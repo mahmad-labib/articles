@@ -3,8 +3,10 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/mahmad-labib/articles/internal/domain"
+	"github.com/mahmad-labib/articles/internal/service/validation"
 	"gorm.io/gorm"
 )
 
@@ -41,7 +43,7 @@ func (s *CategoryService) CreateCategory(ctx context.Context, category *domain.C
 	id, err := s.repo.CreateCategory(ctx, category)
 	if err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
-			return id, gorm.ErrDuplicatedKey
+			return id, fmt.Errorf("%v %v", validation.Validation, gorm.ErrDuplicatedKey)
 		}
 
 		return id, err

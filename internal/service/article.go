@@ -4,28 +4,41 @@ import (
 	"context"
 
 	"github.com/mahmad-labib/articles/internal/domain"
+	"github.com/mahmad-labib/articles/internal/infra/db"
 )
 
 type ArticleRepository interface {
-	CreateArticle(ctx context.Context, article domain.Article, userId int64, catId int64, tags []domain.Tag) (*domain.Article, error)
-	ListArticles(ctx context.Context, Page, PageSize int) ([]domain.Article, error)
+	CreateArticle(ctx context.Context, article domain.Article, tags []domain.Tag) (*domain.Article, error)
+	ListPublishedArticles(ctx context.Context, filter db.ArticleFilter) ([]domain.Article, error)
+	ListProfileArticles(ctx context.Context, id int64, Page, PageSize int) ([]domain.Article, error)
 	DeleteArticle(ctx context.Context, id int64) error
 	GetArticleByID(ctx context.Context, id int64) (*domain.Article, error)
-	UpdateArticle(ctx context.Context, article domain.Article, userId int64, catId int64, tags []domain.Tag) error
+	UpdateArticle(ctx context.Context, article domain.Article, tags []domain.Tag) error
 }
 
 type ArticleService struct {
-	repo ArticleRepository
+	repo      ArticleRepository
+	validator ArticleValidator
 }
 
-func NewArticleService(repo ArticleRepository) *ArticleService {
+type ArticleValidator interface {
+	Validate(article *domain.Article) error
+}
+
+func NewArticleService(repo ArticleRepository, validator ArticleValidator) *ArticleService {
 	return &ArticleService{
-		repo: repo,
+		repo:      repo,
+		validator: validator,
 	}
 }
 
-func (s *ArticleService) CreateArticle(ctx context.Context, article domain.Article, userId int64, catId int64, tags []domain.Tag) (*domain.Article, error) {
-	articleModel, err := s.repo.CreateArticle(ctx, article, userId, catId, tags)
+func (s *ArticleService) CreateArticle(ctx context.Context, article domain.Article, tags []domain.Tag) (*domain.Article, error) {
+	err := s.validator.Validate(&article)
+	if err != nil {
+		return nil, err
+	}
+
+	articleModel, err := s.repo.CreateArticle(ctx, article, tags)
 	if err != nil {
 		return nil, err
 	}
@@ -40,4 +53,22 @@ func (s *ArticleService) GetArticleByID(ctx context.Context, id int64) (*domain.
 	}
 
 	return article, nil
+}
+
+func (s *ArticleService) ListPublishedArticles(ctx context.Context, filter db.ArticleFilter) ([]domain.Article, error) {
+	articles, err := s.repo.ListPublishedArticles(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+
+	return articles, nil
+}
+
+func (s *ArticleService) ListProfileArticles(ctx context.Context, id int64, Page, PageSize int) ([]domain.Article, error) {
+	articles, err := s.repo.ListProfileArticles(ctx, id, Page, PageSize)
+	if err != nil {
+		return nil, err
+	}
+
+	return articles, nil
 }

@@ -23,6 +23,10 @@ type Article struct {
 
 	Comments []Comment
 	Tags     []Tag
-	Category Category
-	Author   Author
+}
+
+type ProfileArticle struct {
+	ID    int64
+	Title string
+	Slug  string
 }

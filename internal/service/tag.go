@@ -3,8 +3,10 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/mahmad-labib/articles/internal/domain"
+	"github.com/mahmad-labib/articles/internal/service/validation"
 	"gorm.io/gorm"
 )
 
@@ -41,7 +43,7 @@ func (s *TagService) CreateTag(ctx context.Context, tag *domain.Tag) (int64, err
 	id, err := s.repo.CreateTag(ctx, tag)
 	if err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
-			return 0, gorm.ErrDuplicatedKey
+			return 0, fmt.Errorf("%v %v", validation.Validation, gorm.ErrDuplicatedKey)
 		}
 
 		return 0, err
@@ -77,7 +79,7 @@ func (s *TagService) UpdateTag(ctx context.Context, tag *domain.Tag) error {
 	err = s.repo.UpdateTag(ctx, tag)
 	if err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
-			return gorm.ErrDuplicatedKey
+			return fmt.Errorf("%v %v", validation.Validation, gorm.ErrDuplicatedKey)
 		}
 
 		return err

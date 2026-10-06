@@ -5,6 +5,7 @@ import (
 
 	"github.com/go-chi/jwtauth/v5"
 	"github.com/mahmad-labib/articles/internal/domain"
+	"github.com/mahmad-labib/articles/internal/infra/db"
 )
 
 type UserService interface {
@@ -30,8 +31,10 @@ type TagService interface {
 }
 
 type ArticleService interface {
-	CreateArticle(ctx context.Context, article domain.Article, userId int64, catId int64, tags []domain.Tag) (*domain.Article, error)
+	CreateArticle(ctx context.Context, article domain.Article, tags []domain.Tag) (*domain.Article, error)
 	GetArticleByID(ctx context.Context, id int64) (*domain.Article, error)
+	ListPublishedArticles(ctx context.Context, filter db.ArticleFilter) ([]domain.Article, error)
+	ListProfileArticles(ctx context.Context, id int64, page, PageSize int) ([]domain.Article, error)
 }
 
 type Handler struct {
