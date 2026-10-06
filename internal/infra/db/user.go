@@ -130,7 +130,7 @@ func (r *Repository) GetProfile(ctx context.Context, id int64) (*domain.Profile,
 
 	err := r.db.
 		Preload("Articles", func(db *gorm.DB) *gorm.DB {
-			return db.Select("id", "user_id")
+			return db.Select("id", "user_id", "title", "slug")
 		}).
 		Find(&user, &models.User{ID: id}).Error
 	if err != nil {
@@ -138,19 +138,21 @@ func (r *Repository) GetProfile(ctx context.Context, id int64) (*domain.Profile,
 	}
 
 	var profile = domain.Profile{
-		User: domain.User{
+		Author: domain.Author{
+			ID:    user.ID,
 			Name:  user.Name,
 			Email: user.Email,
 		},
-		Articles: []domain.Article{},
+		ProfileArticle: []domain.ProfileArticle{},
 	}
 
 	for _, val := range user.Articles {
-		article := domain.Article{
+		article := domain.ProfileArticle{
+			ID:    val.ID,
 			Title: val.Title,
 			Slug:  val.Slug,
 		}
-		profile.Articles = append(profile.Articles, article)
+		profile.ProfileArticle = append(profile.ProfileArticle, article)
 	}
 
 	return &profile, nil

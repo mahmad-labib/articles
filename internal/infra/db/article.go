@@ -19,6 +19,14 @@ type APIArticle struct {
 	Tags     []models.Tag `gorm:"many2many:article_tags;"`
 }
 
+type ArticleFilter struct {
+	CategoryID int64 `json:"category_id"`
+	TagID      int64 `json:"tag_id"`
+	AuthorID   int64 `json:"author_id"`
+	Page       int   `json:"Page"`
+	PageSize   int   `json:"pageSize"`
+}
+
 func (r *Repository) CreateArticle(ctx context.Context, article domain.Article, tags []domain.Tag) (*domain.Article, error) {
 	Article := models.Article{
 		UserID:     article.AuthorID,
@@ -141,14 +149,13 @@ func (r *Repository) DeleteArticle(ctx context.Context, id int64) error {
 	return nil
 }
 
-func (r *Repository) ListArticles(ctx context.Context, Page, PageSize int) ([]domain.Article, error) {
-	var Articles []APIArticle
+func (r *Repository) ListPublishedArticles(ctx context.Context, filter ArticleFilter) ([]domain.Article, error) {
+	var Articles []models.Article
 
 	err := r.db.
-		Scopes(Paginate(Page, PageSize)).
-		Preload("Tags").
-		Preload("Category").
-		Preload("Author").
+		Scopes(Paginate(filter.Page, filter.PageSize)).
+		Scopes(Filter(filter)).
+		Preload("User").
 		Where("status = ?", "published").
 		Find(&Articles).Error
 	if err != nil {
@@ -166,9 +173,49 @@ func (r *Repository) ListArticles(ctx context.Context, Page, PageSize int) ([]do
 		}
 
 		article := domain.Article{
-			ID:    a.ID,
-			Title: a.Title,
-			Tags:  tags,
+			ID:         a.ID,
+			Title:      a.Title,
+			Tags:       tags,
+			Slug:       a.Slug,
+			CategoryID: a.CategoryID,
+			AuthorID:   a.UserID,
+		}
+		articles = append(articles, article)
+	}
+
+	return articles, nil
+}
+
+func (r *Repository) ListProfileArticles(ctx context.Context, id int64, Page, PageSize int) ([]domain.Article, error) {
+	var Articles []models.Article
+
+	err := r.db.
+		Scopes(Paginate(Page, PageSize)).
+		Preload("Tags").
+		Preload("User").
+		Where("user_id = ?", id).
+		Find(&Articles).Error
+	if err != nil {
+		return nil, err
+	}
+
+	articles := make([]domain.Article, 0, len(Articles))
+	for _, a := range Articles {
+		tags := make([]domain.Tag, 0, len(a.Tags))
+		for _, tag := range a.Tags {
+			tags = append(tags, domain.Tag{
+				ID:   tag.ID,
+				Name: tag.Name,
+			})
+		}
+
+		article := domain.Article{
+			ID:         a.ID,
+			Title:      a.Title,
+			Slug:       a.Slug,
+			Tags:       tags,
+			CategoryID: a.CategoryID,
+			AuthorID:   a.UserID,
 		}
 		articles = append(articles, article)
 	}

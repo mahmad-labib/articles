@@ -4,11 +4,13 @@ import (
 	"context"
 
 	"github.com/mahmad-labib/articles/internal/domain"
+	"github.com/mahmad-labib/articles/internal/infra/db"
 )
 
 type ArticleRepository interface {
 	CreateArticle(ctx context.Context, article domain.Article, tags []domain.Tag) (*domain.Article, error)
-	ListArticles(ctx context.Context, Page, PageSize int) ([]domain.Article, error)
+	ListPublishedArticles(ctx context.Context, filter db.ArticleFilter) ([]domain.Article, error)
+	ListProfileArticles(ctx context.Context, id int64, Page, PageSize int) ([]domain.Article, error)
 	DeleteArticle(ctx context.Context, id int64) error
 	GetArticleByID(ctx context.Context, id int64) (*domain.Article, error)
 	UpdateArticle(ctx context.Context, article domain.Article, tags []domain.Tag) error
@@ -51,4 +53,22 @@ func (s *ArticleService) GetArticleByID(ctx context.Context, id int64) (*domain.
 	}
 
 	return article, nil
+}
+
+func (s *ArticleService) ListPublishedArticles(ctx context.Context, filter db.ArticleFilter) ([]domain.Article, error) {
+	articles, err := s.repo.ListPublishedArticles(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+
+	return articles, nil
+}
+
+func (s *ArticleService) ListProfileArticles(ctx context.Context, id int64, Page, PageSize int) ([]domain.Article, error) {
+	articles, err := s.repo.ListProfileArticles(ctx, id, Page, PageSize)
+	if err != nil {
+		return nil, err
+	}
+
+	return articles, nil
 }
