@@ -35,6 +35,8 @@ type ArticleService interface {
 	GetArticleByID(ctx context.Context, id int64) (*domain.Article, error)
 	ListPublishedArticles(ctx context.Context, filter db.ArticleFilter) ([]domain.Article, error)
 	ListProfileArticles(ctx context.Context, id int64, page, PageSize int) ([]domain.Article, error)
+	UpdateArticle(ctx context.Context, article domain.Article, tags []domain.Tag) (*domain.Article, error)
+	DeleteArticle(ctx context.Context, id int64) error
 }
 
 type Handler struct {

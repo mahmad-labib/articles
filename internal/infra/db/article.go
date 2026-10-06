@@ -116,7 +116,6 @@ func (r *Repository) GetArticleByID(ctx context.Context, id int64) (*domain.Arti
 
 func (r *Repository) UpdateArticle(ctx context.Context, article domain.Article, tags []domain.Tag) error {
 	Article := models.Article{
-		ID:         article.ID,
 		Title:      article.Title,
 		Slug:       article.Slug,
 		Body:       article.Body,
@@ -124,7 +123,7 @@ func (r *Repository) UpdateArticle(ctx context.Context, article domain.Article, 
 		CategoryID: article.CategoryID,
 	}
 
-	res := r.db.WithContext(ctx).Model(&models.Article{}).Where("id = ?", article.ID).Updates(Article)
+	res := r.db.WithContext(ctx).Model(&models.Article{}).Where("id = ?", article.ID).Where("user_id = ?", ctx.Value("userID")).Updates(Article)
 	if res.Error != nil {
 		return fmt.Errorf("failed to update Article with err: %w", res.Error)
 	}

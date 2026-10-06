@@ -5,6 +5,7 @@ import (
 
 	"github.com/mahmad-labib/articles/internal/domain"
 	"github.com/mahmad-labib/articles/internal/infra/db"
+	"github.com/mahmad-labib/articles/internal/service/validation"
 )
 
 type ArticleRepository interface {
@@ -71,4 +72,36 @@ func (s *ArticleService) ListProfileArticles(ctx context.Context, id int64, Page
 	}
 
 	return articles, nil
+}
+
+func (s *ArticleService) UpdateArticle(ctx context.Context, article domain.Article, tags []domain.Tag) (*domain.Article, error) {
+	err := s.validator.Validate(&article)
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.repo.UpdateArticle(ctx, article, tags)
+	if err != nil {
+		return nil, err
+	}
+
+	return &article, nil
+}
+
+func (s *ArticleService) DeleteArticle(ctx context.Context, id int64) error {
+	article, err := s.repo.GetArticleByID(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	if article.AuthorID != ctx.Value("userID") {
+		return validation.Validation
+	}
+
+	err = s.repo.DeleteArticle(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
