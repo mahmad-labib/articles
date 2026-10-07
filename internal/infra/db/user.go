@@ -88,10 +88,10 @@ func (r *Repository) UpdateUser(ctx context.Context, domUser *domain.ApiUser) er
 	return nil
 }
 
-func (r *Repository) ListUser(ctx context.Context, Page, PageSize int) ([]domain.ApiUser, error) {
+func (r *Repository) ListUser(ctx context.Context, paginate Pagination) ([]domain.ApiUser, error) {
 	var Users []models.User
 
-	err := r.db.Scopes(Paginate(Page, PageSize)).Find(&Users).Error
+	err := r.db.Scopes(Paginate(paginate)).Find(&Users).Error
 	if err != nil {
 		return nil, err
 	}

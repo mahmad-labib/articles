@@ -45,11 +45,11 @@ func (r *Repository) GetCategoryByID(ctx context.Context, id int64) (*domain.Cat
 	return &Item, nil
 }
 
-func (r *Repository) ListCategories(ctx context.Context, page, pageSize int) ([]domain.Category, error) {
+func (r *Repository) ListCategories(ctx context.Context, paginate Pagination) ([]domain.Category, error) {
 	categories := []models.Category{}
 	items := []domain.Category{}
 
-	err := r.db.WithContext(ctx).Scopes(Paginate(page, pageSize)).Find(&categories).Error
+	err := r.db.WithContext(ctx).Scopes(Paginate(paginate)).Find(&categories).Error
 	if err != nil {
 		return items, err
 	}

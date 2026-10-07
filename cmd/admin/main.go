@@ -47,6 +47,7 @@ func main() {
 	categoryService := loadCategoryService(repository)
 	tagService := loadTagService(repository)
 	articleService := loadArticleService(repository)
+	commentService := loadCommentService(repository)
 
 	handler := handlers.NewHandler(
 		jwt,
@@ -54,6 +55,7 @@ func main() {
 		tagService,
 		categoryService,
 		articleService,
+		commentService,
 	)
 
 	server := admin.NewServer(cfg, jwt, handler)
@@ -128,6 +130,14 @@ func loadArticleService(repository *db.Repository) *service.ArticleService {
 	articleValidator := validation.NewArticleValidator()
 
 	service := service.NewArticleService(repository, articleValidator)
+
+	return service
+}
+
+func loadCommentService(repository *db.Repository) *service.CommentService {
+	commentValidator := validation.NewCommentValidator()
+
+	service := service.NewCommentService(repository, commentValidator)
 
 	return service
 }

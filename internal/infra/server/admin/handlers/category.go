@@ -7,17 +7,12 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/mahmad-labib/articles/internal/domain"
+	"github.com/mahmad-labib/articles/internal/infra/db"
 )
 
 type CategoryCreation struct {
 	Name string `json:"name"`
 	Slug string `json:"slug"`
-}
-
-type Pagination struct {
-	Page     int    `json:"page"`
-	PageSize int    `json:"pageSize"`
-	Filter   string `json:"filter"`
 }
 
 func (h *Handler) CreateCategory(w http.ResponseWriter, r *http.Request) {
@@ -49,7 +44,7 @@ func (h *Handler) CreateCategory(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) ListCategories(w http.ResponseWriter, r *http.Request) {
-	var body Pagination
+	var body db.Pagination
 
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
@@ -60,7 +55,7 @@ func (h *Handler) ListCategories(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	list, err := h.csvc.ListCategories(r.Context(), body.Page, body.PageSize)
+	list, err := h.csvc.ListCategories(r.Context(), body)
 	if err != nil {
 		handleServiceError(w, err)
 

@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/mahmad-labib/articles/internal/domain"
+	"github.com/mahmad-labib/articles/internal/infra/db"
 	"github.com/mahmad-labib/articles/internal/service/validation"
 	"gorm.io/gorm"
 )
@@ -13,7 +14,7 @@ import (
 type TagRepository interface {
 	CreateTag(ctx context.Context, tag *domain.Tag) (int64, error)
 	GetTagByID(ctx context.Context, id int64) (*domain.Tag, error)
-	ListTags(ctx context.Context, page, pageSize int) ([]domain.Tag, error)
+	ListTags(ctx context.Context, paginate db.Pagination) ([]domain.Tag, error)
 	UpdateTag(ctx context.Context, tag *domain.Tag) error
 	DeleteTag(ctx context.Context, id int64) error
 }
@@ -61,8 +62,8 @@ func (s *TagService) GetTagByID(ctx context.Context, id int64) (*domain.Tag, err
 	return item, nil
 }
 
-func (s *TagService) ListTags(ctx context.Context, page, pageSize int) ([]domain.Tag, error) {
-	items, err := s.repo.ListTags(ctx, page, pageSize)
+func (s *TagService) ListTags(ctx context.Context, paginate db.Pagination) ([]domain.Tag, error) {
+	items, err := s.repo.ListTags(ctx, paginate)
 	if err != nil {
 		return nil, err
 	}

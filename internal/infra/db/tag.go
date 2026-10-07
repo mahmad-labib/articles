@@ -42,11 +42,11 @@ func (r *Repository) GetTagByID(ctx context.Context, id int64) (*domain.Tag, err
 	return &Item, nil
 }
 
-func (r *Repository) ListTags(ctx context.Context, page, pageSize int) ([]domain.Tag, error) {
+func (r *Repository) ListTags(ctx context.Context, paginate Pagination) ([]domain.Tag, error) {
 	tags := []models.Tag{}
 	items := []domain.Tag{}
 
-	err := r.db.WithContext(ctx).Scopes(Paginate(page, pageSize)).Find(&tags).Error
+	err := r.db.WithContext(ctx).Scopes(Paginate(paginate)).Find(&tags).Error
 	if err != nil {
 		return items, err
 	}

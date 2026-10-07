@@ -4,8 +4,17 @@ import (
 	"gorm.io/gorm"
 )
 
-func Paginate(page, PageSize int) func(db *gorm.DB) *gorm.DB {
+type Pagination struct {
+	Page     int    `json:"page"`
+	PageSize int    `json:"pageSize"`
+	Filter   string `json:"filter"`
+}
+
+func Paginate(paginate Pagination) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
+		page := paginate.Page
+		PageSize := paginate.PageSize
+
 		if page <= 0 {
 			page = 1
 		}
