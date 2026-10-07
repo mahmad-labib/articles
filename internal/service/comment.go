@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/mahmad-labib/articles/internal/domain"
 	"github.com/mahmad-labib/articles/internal/infra/db"
@@ -14,6 +15,7 @@ type CommentRepository interface {
 	ListCommentsByArticleID(ctx context.Context, paginate db.Pagination, articleId int64) ([]domain.Comment, error)
 	DeleteComment(ctx context.Context, commentId int64) error
 	GetCommentByID(ctx context.Context, commentId int64) (*domain.Comment, error)
+	GetArticleByID(ctx context.Context, articleId int64) (*domain.Article, error)
 }
 
 type CommentValidator interface {
@@ -42,7 +44,16 @@ func (s *CommentService) ListCommentsByArticleID(ctx context.Context, paginate d
 }
 
 func (s *CommentService) CreateComment(ctx context.Context, comment *domain.Comment) error {
-	err := s.validator.Validate(comment)
+	article, err := s.repo.GetArticleByID(ctx, comment.ArticleID)
+	if err != nil {
+		return fmt.Errorf("article not found: %w", gorm.ErrRecordNotFound)
+	}
+
+	if article.ID != comment.ArticleID {
+		return fmt.Errorf("article not found: %w", gorm.ErrRecordNotFound)
+	}
+
+	err = s.validator.Validate(comment)
 	if err != nil {
 		return err
 	}
