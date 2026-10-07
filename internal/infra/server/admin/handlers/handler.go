@@ -16,7 +16,7 @@ type UserService interface {
 
 type CategoryService interface {
 	CreateCategory(ctx context.Context, category *domain.Category) (int64, error)
-	ListCategories(ctx context.Context, page, pageSize int) ([]domain.Category, error)
+	ListCategories(ctx context.Context, paginate db.Pagination) ([]domain.Category, error)
 	GetCategoryByID(ctx context.Context, id int64) (*domain.Category, error)
 	UpdateCategory(ctx context.Context, category *domain.Category) error
 	DeleteCategory(ctx context.Context, id int64) error
@@ -24,7 +24,7 @@ type CategoryService interface {
 
 type TagService interface {
 	CreateTag(ctx context.Context, tag *domain.Tag) (int64, error)
-	ListTags(ctx context.Context, page, pageSize int) ([]domain.Tag, error)
+	ListTags(ctx context.Context, paginate db.Pagination) ([]domain.Tag, error)
 	GetTagByID(ctx context.Context, id int64) (*domain.Tag, error)
 	UpdateTag(ctx context.Context, tag *domain.Tag) error
 	DeleteTag(ctx context.Context, id int64) error
@@ -34,17 +34,24 @@ type ArticleService interface {
 	CreateArticle(ctx context.Context, article domain.Article, tags []domain.Tag) (*domain.Article, error)
 	GetArticleByID(ctx context.Context, id int64) (*domain.Article, error)
 	ListPublishedArticles(ctx context.Context, filter db.ArticleFilter) ([]domain.Article, error)
-	ListProfileArticles(ctx context.Context, id int64, page, PageSize int) ([]domain.Article, error)
+	ListProfileArticles(ctx context.Context, id int64, paginate db.Pagination) ([]domain.Article, error)
 	UpdateArticle(ctx context.Context, article domain.Article, tags []domain.Tag) (*domain.Article, error)
 	DeleteArticle(ctx context.Context, id int64) error
 }
 
+type CommentService interface {
+	ListCommentsByArticleID(ctx context.Context, paginate db.Pagination, articleId int64) ([]domain.Comment, error)
+	CreateComment(ctx context.Context, comment *domain.Comment) error
+	DeleteComment(ctx context.Context, commentId int64) error
+}
+
 type Handler struct {
-	jwt  *jwtauth.JWTAuth
-	usvc UserService
-	tsvc TagService
-	csvc CategoryService
-	asvc ArticleService
+	jwt   *jwtauth.JWTAuth
+	usvc  UserService
+	tsvc  TagService
+	csvc  CategoryService
+	asvc  ArticleService
+	cosvc CommentService
 }
 
 func NewHandler(
@@ -53,12 +60,14 @@ func NewHandler(
 	tsvc TagService,
 	csvc CategoryService,
 	asvc ArticleService,
+	cosvc CommentService,
 ) *Handler {
 	return &Handler{
-		jwt:  jwt,
-		usvc: usvc,
-		tsvc: tsvc,
-		csvc: csvc,
-		asvc: asvc,
+		jwt:   jwt,
+		usvc:  usvc,
+		tsvc:  tsvc,
+		csvc:  csvc,
+		asvc:  asvc,
+		cosvc: cosvc,
 	}
 }

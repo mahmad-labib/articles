@@ -11,10 +11,13 @@ import (
 type ArticleRepository interface {
 	CreateArticle(ctx context.Context, article domain.Article, tags []domain.Tag) (*domain.Article, error)
 	ListPublishedArticles(ctx context.Context, filter db.ArticleFilter) ([]domain.Article, error)
-	ListProfileArticles(ctx context.Context, id int64, Page, PageSize int) ([]domain.Article, error)
+	ListProfileArticles(ctx context.Context, id int64, paginate db.Pagination) ([]domain.Article, error)
 	DeleteArticle(ctx context.Context, id int64) error
 	GetArticleByID(ctx context.Context, id int64) (*domain.Article, error)
 	UpdateArticle(ctx context.Context, article domain.Article, tags []domain.Tag) error
+	ListCommentsByArticleID(ctx context.Context, paginate db.Pagination, articleId int64) ([]domain.Comment, error)
+	CreateComment(ctx context.Context, comment *domain.Comment) error
+	DeleteComment(ctx context.Context, commentId int64) error
 }
 
 type ArticleService struct {
@@ -65,8 +68,8 @@ func (s *ArticleService) ListPublishedArticles(ctx context.Context, filter db.Ar
 	return articles, nil
 }
 
-func (s *ArticleService) ListProfileArticles(ctx context.Context, id int64, Page, PageSize int) ([]domain.Article, error) {
-	articles, err := s.repo.ListProfileArticles(ctx, id, Page, PageSize)
+func (s *ArticleService) ListProfileArticles(ctx context.Context, id int64, paginate db.Pagination) ([]domain.Article, error) {
+	articles, err := s.repo.ListProfileArticles(ctx, id, paginate)
 	if err != nil {
 		return nil, err
 	}

@@ -152,7 +152,10 @@ func (r *Repository) ListPublishedArticles(ctx context.Context, filter ArticleFi
 	var Articles []models.Article
 
 	err := r.db.
-		Scopes(Paginate(filter.Page, filter.PageSize)).
+		Scopes(Paginate(Pagination{
+			Page:     filter.Page,
+			PageSize: filter.PageSize,
+		})).
 		Scopes(Filter(filter)).
 		Preload("User").
 		Where("status = ?", "published").
@@ -185,11 +188,11 @@ func (r *Repository) ListPublishedArticles(ctx context.Context, filter ArticleFi
 	return articles, nil
 }
 
-func (r *Repository) ListProfileArticles(ctx context.Context, id int64, Page, PageSize int) ([]domain.Article, error) {
+func (r *Repository) ListProfileArticles(ctx context.Context, id int64, paginate Pagination) ([]domain.Article, error) {
 	var Articles []models.Article
 
 	err := r.db.
-		Scopes(Paginate(Page, PageSize)).
+		Scopes(Paginate(paginate)).
 		Preload("Tags").
 		Preload("User").
 		Where("user_id = ?", id).

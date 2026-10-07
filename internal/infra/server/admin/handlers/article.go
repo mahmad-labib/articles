@@ -241,7 +241,7 @@ func (h *Handler) ListProfileArticles(w http.ResponseWriter, r *http.Request) {
 		userID = int64(val)
 	}
 
-	var body Pagination
+	var body db.Pagination
 
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
@@ -252,7 +252,7 @@ func (h *Handler) ListProfileArticles(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	articles, err := h.asvc.ListProfileArticles(r.Context(), userID, body.Page, body.PageSize)
+	articles, err := h.asvc.ListProfileArticles(r.Context(), userID, body)
 	if err != nil {
 		handleServiceError(w, err)
 
@@ -262,6 +262,6 @@ func (h *Handler) ListProfileArticles(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]interface{}{
-		"artilces": articles,
+		"articles": articles,
 	})
 }

@@ -6,13 +6,14 @@ import (
 	"fmt"
 
 	"github.com/mahmad-labib/articles/internal/domain"
+	"github.com/mahmad-labib/articles/internal/infra/db"
 	"github.com/mahmad-labib/articles/internal/service/validation"
 	"gorm.io/gorm"
 )
 
 type CategoryRepository interface {
 	CreateCategory(ctx context.Context, category *domain.Category) (int64, error)
-	ListCategories(ctx context.Context, page, pageSize int) ([]domain.Category, error)
+	ListCategories(ctx context.Context, paginate db.Pagination) ([]domain.Category, error)
 	GetCategoryByID(ctx context.Context, id int64) (*domain.Category, error)
 	UpdateCategory(ctx context.Context, category *domain.Category) error
 	DeleteCategory(ctx context.Context, id int64) error
@@ -52,8 +53,8 @@ func (s *CategoryService) CreateCategory(ctx context.Context, category *domain.C
 	return id, nil
 }
 
-func (s *CategoryService) ListCategories(ctx context.Context, page, pageSize int) ([]domain.Category, error) {
-	list, err := s.repo.ListCategories(ctx, page, pageSize)
+func (s *CategoryService) ListCategories(ctx context.Context, paginate db.Pagination) ([]domain.Category, error) {
+	list, err := s.repo.ListCategories(ctx, paginate)
 	if err != nil {
 		return list, err
 	}

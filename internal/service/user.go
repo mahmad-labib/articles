@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-chi/jwtauth/v5"
 	"github.com/mahmad-labib/articles/internal/domain"
+	"github.com/mahmad-labib/articles/internal/infra/db"
 	"github.com/mahmad-labib/articles/internal/service/validation"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -15,7 +16,7 @@ import (
 type UserRepository interface {
 	GetUserByID(ctx context.Context, ID int64) *domain.ApiUser
 	UpdateUser(ctx context.Context, domUser *domain.ApiUser) error
-	ListUser(ctx context.Context, Page, PageSize int) ([]domain.ApiUser, error)
+	ListUser(ctx context.Context, paginate db.Pagination) ([]domain.ApiUser, error)
 	DeleteUser(ctx context.Context, ID int64) error
 	GetUserByEmail(ctx context.Context, Email string) (*domain.ApiUser, error)
 	GetUserByEmail_Login(ctx context.Context, Email string) (string, error)
@@ -96,8 +97,8 @@ func (s *UserService) GetUserByID(ctx context.Context, ID int64) *domain.ApiUser
 	return user
 }
 
-func (s *UserService) ListUser(ctx context.Context, Page, PageSize int) ([]domain.ApiUser, error) {
-	usersList, err := s.repo.ListUser(ctx, Page, PageSize)
+func (s *UserService) ListUser(ctx context.Context, paginate db.Pagination) ([]domain.ApiUser, error) {
+	usersList, err := s.repo.ListUser(ctx, paginate)
 	if err != nil {
 		return usersList, err
 	}

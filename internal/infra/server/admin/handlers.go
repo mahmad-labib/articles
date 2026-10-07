@@ -37,3 +37,9 @@ type ArticleHandler interface {
 	UpdateArticle(w http.ResponseWriter, r *http.Request)
 	DeleteArticle(w http.ResponseWriter, r *http.Request)
 }
+
+type CommentHandler interface {
+	ListCommentsByArticleID(w http.ResponseWriter, r *http.Request)
+	CreateComment(w http.ResponseWriter, r *http.Request)
+	DeleteComment(w http.ResponseWriter, r *http.Request)
+}

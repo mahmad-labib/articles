@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/mahmad-labib/articles/internal/domain"
+	"github.com/mahmad-labib/articles/internal/infra/db"
 )
 
 type TagRequest struct {
@@ -41,7 +42,7 @@ func (h *Handler) CreateTag(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) ListTags(w http.ResponseWriter, r *http.Request) {
-	var body Pagination
+	var body db.Pagination
 
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
@@ -52,7 +53,7 @@ func (h *Handler) ListTags(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tags, err := h.tsvc.ListTags(r.Context(), body.Page, body.PageSize)
+	tags, err := h.tsvc.ListTags(r.Context(), body)
 	if err != nil {
 		handleServiceError(w, err)
 
