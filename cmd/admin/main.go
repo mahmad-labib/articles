@@ -49,7 +49,12 @@ func main() {
 	articleService := loadArticleService(repository)
 	commentService := loadCommentService(repository)
 
+	//channel handels the views count
+	Views := make(chan int, 1000)
+	go worker(Views, articleService)
+
 	handler := handlers.NewHandler(
+		Views,
 		jwt,
 		userService,
 		tagService,
@@ -87,6 +92,33 @@ func main() {
 
 	<-done
 	fmt.Println("Server exited cleanly")
+}
+
+var ticker = time.NewTicker(5000 * time.Millisecond)
+
+func worker(ch <-chan int, articleService *service.ArticleService) {
+	var IdsList = make(map[int]int)
+	for {
+		select {
+		case id, ok := <-ch:
+			if !ok {
+				// Channel was closed
+				return
+			}
+			if IdsList[id] != 0 {
+				IdsList[id] = IdsList[id] + 1
+			} else {
+				IdsList[id] = 1
+			}
+		case <-ticker.C:
+			if len(IdsList) > 0 {
+				for id, views := range IdsList {
+					articleService.AddView(context.Background(), int64(id), views)
+				}
+				IdsList = make(map[int]int)
+			}
+		}
+	}
 }
 
 func loadConfig() *config.Config {
