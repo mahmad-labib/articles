@@ -37,6 +37,7 @@ type ArticleService interface {
 	ListProfileArticles(ctx context.Context, id int64, paginate db.Pagination) ([]domain.Article, error)
 	UpdateArticle(ctx context.Context, article domain.Article, tags []domain.Tag) (*domain.Article, error)
 	DeleteArticle(ctx context.Context, id int64) error
+	AddView(ctx context.Context, articleID int64, views int) error
 }
 
 type CommentService interface {
@@ -46,6 +47,7 @@ type CommentService interface {
 }
 
 type Handler struct {
+	views chan<- int
 	jwt   *jwtauth.JWTAuth
 	usvc  UserService
 	tsvc  TagService
@@ -55,6 +57,7 @@ type Handler struct {
 }
 
 func NewHandler(
+	views chan<- int,
 	jwt *jwtauth.JWTAuth,
 	usvc UserService,
 	tsvc TagService,
@@ -63,6 +66,7 @@ func NewHandler(
 	cosvc CommentService,
 ) *Handler {
 	return &Handler{
+		views: views,
 		jwt:   jwt,
 		usvc:  usvc,
 		tsvc:  tsvc,

@@ -224,3 +224,37 @@ func (r *Repository) ListProfileArticles(ctx context.Context, id int64, paginate
 
 	return articles, nil
 }
+
+func (r *Repository) AddView(ctx context.Context, articleID int64, views int) error {
+	// 1. Check if the article exists
+	var article models.Article
+	if err := r.db.WithContext(ctx).First(&article, articleID).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return fmt.Errorf("article not found: %w", err)
+		}
+		return fmt.Errorf("failed to check article existence: %w", err)
+	}
+
+	// 2. Try to perform an atomic increment assuming the record exists
+	res := r.db.WithContext(ctx).
+		Model(&models.View{}).
+		Where("article_id = ?", articleID).
+		Update("views", gorm.Expr("views + ?", views))
+
+	if res.Error != nil {
+		return fmt.Errorf("failed to update view count: %w", res.Error)
+	}
+
+	// 3. If no row was affected, create the initial record
+	if res.RowsAffected == 0 {
+		view := models.View{
+			ArticleID: articleID,
+			Views:     1,
+		}
+		if err := r.db.WithContext(ctx).Create(&view).Error; err != nil {
+			return fmt.Errorf("failed to create view record: %w", err)
+		}
+	}
+
+	return nil
+}

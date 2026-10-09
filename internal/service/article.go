@@ -18,6 +18,7 @@ type ArticleRepository interface {
 	ListCommentsByArticleID(ctx context.Context, paginate db.Pagination, articleId int64) ([]domain.Comment, error)
 	CreateComment(ctx context.Context, comment *domain.Comment) error
 	DeleteComment(ctx context.Context, commentId int64) error
+	AddView(ctx context.Context, articleID int64, views int) error
 }
 
 type ArticleService struct {
@@ -102,6 +103,15 @@ func (s *ArticleService) DeleteArticle(ctx context.Context, id int64) error {
 	}
 
 	err = s.repo.DeleteArticle(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *ArticleService) AddView(ctx context.Context, articleID int64, views int) error {
+	err := s.repo.AddView(ctx, articleID, views)
 	if err != nil {
 		return err
 	}
