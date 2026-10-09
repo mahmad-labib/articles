@@ -18,6 +18,7 @@ type Handler interface {
 	TagHandler
 	ArticleHandler
 	CommentHandler
+	SearchHandler
 }
 
 func NewServer(cfg *config.Config, jwt *jwtauth.JWTAuth, h Handler) *http.Server {
@@ -82,6 +83,9 @@ func v1routers(jwt *jwtauth.JWTAuth, h Handler) chi.Router {
 			r.Get("/articles/{id}/comments", h.ListCommentsByArticleID)
 			r.Post("/articles/{id}/comments", h.CreateComment)
 			r.Delete("/articles/{id}/comments/{commentId}", h.DeleteComment)
+
+			// search routes
+			r.Get("/search/{name}", h.Search)
 		})
 	})
 

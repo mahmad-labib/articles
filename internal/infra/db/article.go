@@ -225,6 +225,50 @@ func (r *Repository) ListProfileArticles(ctx context.Context, id int64, paginate
 	return articles, nil
 }
 
+func (r *Repository) GetArticleListByTitle(ctx context.Context, title string) (*[]domain.Article, error) {
+	var Articles []models.Article
+
+	err := r.db.Preload("Comments").Preload("Tags").Where("slug LIKE ?", "%"+title+"%").Find(&Articles).Error
+	if err != nil {
+		return nil, err
+	}
+
+	articles := make([]domain.Article, 0, len(Articles))
+	for _, a := range Articles {
+		tags := make([]domain.Tag, 0, len(a.Tags))
+		for _, tag := range a.Tags {
+			tags = append(tags, domain.Tag{
+				ID:   tag.ID,
+				Name: tag.Name,
+			})
+		}
+
+		comments := make([]domain.Comment, 0, len(a.Comments))
+		for _, comment := range a.Comments {
+			comments = append(comments, domain.Comment{
+				ID:        comment.ID,
+				ArticleID: comment.ArticleID,
+				AuthorID:  comment.UserID,
+				Body:      comment.Body,
+				CreatedAt: comment.CreatedAt,
+			})
+		}
+
+		article := domain.Article{
+			ID:         a.ID,
+			Title:      a.Title,
+			Slug:       a.Slug,
+			Tags:       tags,
+			CategoryID: a.CategoryID,
+			AuthorID:   a.UserID,
+			Comments:   comments,
+		}
+		articles = append(articles, article)
+	}
+
+	return &articles, nil
+}
+
 func (r *Repository) AddView(ctx context.Context, articleID int64, views int) error {
 	// 1. Check if the article exists
 	var article models.Article

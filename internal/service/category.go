@@ -17,6 +17,7 @@ type CategoryRepository interface {
 	GetCategoryByID(ctx context.Context, id int64) (*domain.Category, error)
 	UpdateCategory(ctx context.Context, category *domain.Category) error
 	DeleteCategory(ctx context.Context, id int64) error
+	GetCategoryListBySlug(ctx context.Context, slug string) (*[]domain.Category, error)
 }
 
 type CategoryValidator interface {
@@ -92,4 +93,13 @@ func (s *CategoryService) DeleteCategory(ctx context.Context, id int64) error {
 	}
 
 	return nil
+}
+
+func (s *CategoryService) GetCategoryListBySlug(ctx context.Context, slug string) (*[]domain.Category, error) {
+	categories, err := s.repo.GetCategoryListBySlug(ctx, slug)
+	if err != nil {
+		return nil, err
+	}
+
+	return categories, nil
 }
