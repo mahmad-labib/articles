@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"strings"
 
 	"github.com/mahmad-labib/articles/internal/domain"
 	"github.com/mahmad-labib/articles/internal/infra/db"
@@ -19,6 +20,7 @@ type ArticleRepository interface {
 	CreateComment(ctx context.Context, comment *domain.Comment) error
 	DeleteComment(ctx context.Context, commentId int64) error
 	AddView(ctx context.Context, articleID int64, views int) error
+	GetArticleListByTitle(ctx context.Context, title string) (*[]domain.Article, error)
 }
 
 type ArticleService struct {
@@ -117,4 +119,14 @@ func (s *ArticleService) AddView(ctx context.Context, articleID int64, views int
 	}
 
 	return nil
+}
+
+func (s *ArticleService) GetArticleListByTitle(ctx context.Context, title string) (*[]domain.Article, error) {
+	title = strings.ToLower(title)
+	articles, err := s.repo.GetArticleListByTitle(ctx, title)
+	if err != nil {
+		return nil, err
+	}
+
+	return articles, nil
 }

@@ -118,3 +118,22 @@ func (r *Repository) GetCategoryWithArticles(ctx context.Context, id int64) (*do
 
 	return &Item, nil
 }
+
+func (r *Repository) GetCategoryListBySlug(ctx context.Context, slug string) (*[]domain.Category, error) {
+	Category := []models.Category{}
+	Item := []domain.Category{}
+
+	err := r.db.Where("slug LIKE ?", "%"+slug+"%").Find(&Category).Error
+	if err != nil {
+		return &Item, err
+	}
+
+	for _, cat := range Category {
+		Item = append(Item, domain.Category{
+			ID:   cat.ID,
+			Name: cat.Name,
+		})
+	}
+
+	return &Item, nil
+}

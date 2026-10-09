@@ -20,6 +20,7 @@ type CategoryService interface {
 	GetCategoryByID(ctx context.Context, id int64) (*domain.Category, error)
 	UpdateCategory(ctx context.Context, category *domain.Category) error
 	DeleteCategory(ctx context.Context, id int64) error
+	GetCategoryListBySlug(ctx context.Context, slug string) (*[]domain.Category, error)
 }
 
 type TagService interface {
@@ -28,6 +29,7 @@ type TagService interface {
 	GetTagByID(ctx context.Context, id int64) (*domain.Tag, error)
 	UpdateTag(ctx context.Context, tag *domain.Tag) error
 	DeleteTag(ctx context.Context, id int64) error
+	GetTagsByName(ctx context.Context, name string) (*[]domain.Tag, error)
 }
 
 type ArticleService interface {
@@ -38,6 +40,7 @@ type ArticleService interface {
 	UpdateArticle(ctx context.Context, article domain.Article, tags []domain.Tag) (*domain.Article, error)
 	DeleteArticle(ctx context.Context, id int64) error
 	AddView(ctx context.Context, articleID int64, views int) error
+	GetArticleListByTitle(ctx context.Context, title string) (*[]domain.Article, error)
 }
 
 type CommentService interface {

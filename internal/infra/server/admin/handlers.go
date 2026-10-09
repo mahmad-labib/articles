@@ -38,6 +38,10 @@ type ArticleHandler interface {
 	DeleteArticle(w http.ResponseWriter, r *http.Request)
 }
 
+type SearchHandler interface {
+	Search(w http.ResponseWriter, r *http.Request)
+}
+
 type CommentHandler interface {
 	ListCommentsByArticleID(w http.ResponseWriter, r *http.Request)
 	CreateComment(w http.ResponseWriter, r *http.Request)

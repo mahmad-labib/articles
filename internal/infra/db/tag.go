@@ -99,3 +99,21 @@ func (r *Repository) DeleteTag(ctx context.Context, id int64) error {
 
 	return nil
 }
+
+func (r *Repository) GetTagsByName(ctx context.Context, name string) (*[]domain.Tag, error) {
+	var tags []models.Tag
+	err := r.db.WithContext(ctx).Where("name Like ?", "%"+name+"%").Find(&tags).Error
+	if err != nil {
+		return nil, fmt.Errorf("failed to get tags by name: %w", err)
+	}
+
+	domainTags := make([]domain.Tag, len(tags))
+	for i, tag := range tags {
+		domainTags[i] = domain.Tag{
+			ID:   tag.ID,
+			Name: tag.Name,
+		}
+	}
+
+	return &domainTags, nil
+}

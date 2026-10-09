@@ -17,6 +17,7 @@ type TagRepository interface {
 	ListTags(ctx context.Context, paginate db.Pagination) ([]domain.Tag, error)
 	UpdateTag(ctx context.Context, tag *domain.Tag) error
 	DeleteTag(ctx context.Context, id int64) error
+	GetTagsByName(ctx context.Context, name string) (*[]domain.Tag, error)
 }
 
 type TagValidator interface {
@@ -96,4 +97,13 @@ func (s *TagService) DeleteTag(ctx context.Context, id int64) error {
 	}
 
 	return nil
+}
+
+func (s *TagService) GetTagsByName(ctx context.Context, name string) (*[]domain.Tag, error) {
+	tags, err := s.repo.GetTagsByName(ctx, name)
+	if err != nil {
+		return nil, err
+	}
+
+	return tags, nil
 }
