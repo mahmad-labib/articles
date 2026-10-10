@@ -18,7 +18,7 @@ type Article struct {
 	Status      ArticleStatus
 	AuthorID    int64
 	CategoryID  int64
-	PublishedAt *time.Time
+	PublishedAt time.Time
 	CreatedAt   time.Time
 
 	Comments []Comment

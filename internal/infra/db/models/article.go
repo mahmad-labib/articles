@@ -1,16 +1,21 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type Article struct {
-	ID         int64
-	Title      string
-	Slug       string
-	Body       string
-	Status     string
-	UserID     int64
-	CategoryID int64
-	DeletedAt  gorm.DeletedAt
+	ID          int64
+	Title       string
+	Slug        string
+	Body        string
+	Status      string
+	UserID      int64
+	CategoryID  int64
+	DeletedAt   gorm.DeletedAt
+	PublishedAt time.Time
 
 	User     User
 	Category Category

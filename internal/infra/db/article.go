@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/mahmad-labib/articles/internal/domain"
 	"github.com/mahmad-labib/articles/internal/infra/db/models"
@@ -29,12 +30,13 @@ type ArticleFilter struct {
 
 func (r *Repository) CreateArticle(ctx context.Context, article domain.Article, tags []domain.Tag) (*domain.Article, error) {
 	Article := models.Article{
-		UserID:     article.AuthorID,
-		CategoryID: article.CategoryID,
-		Title:      article.Title,
-		Slug:       strings.ToLower(article.Title),
-		Body:       article.Body,
-		Status:     string(article.Status),
+		UserID:      article.AuthorID,
+		CategoryID:  article.CategoryID,
+		Title:       article.Title,
+		Slug:        strings.ToLower(article.Title),
+		Body:        article.Body,
+		Status:      string(article.Status),
+		PublishedAt: article.PublishedAt,
 	}
 
 	result := r.db.WithContext(ctx).Create(&Article)
@@ -70,6 +72,25 @@ func (r *Repository) CreateArticle(ctx context.Context, article domain.Article, 
 	}
 
 	return newArticle, nil
+}
+func (r *Repository) PublishArticle(ctx context.Context) error {
+	Article := []models.Article{}
+
+	err := r.db.Where("status = ?", "scheduled").Find(&Article).Error
+	if err != nil {
+		return err
+	}
+
+	for _, a := range Article {
+		if !a.PublishedAt.IsZero() && a.PublishedAt.Before(time.Now()) {
+			res := r.db.WithContext(ctx).Model(&models.Article{}).Where("id = ?", a.ID).Update("status", "published")
+			if res.Error != nil {
+				return fmt.Errorf("failed to update Article with err: %w", res.Error)
+			}
+		}
+	}
+
+	return nil
 }
 
 func (r *Repository) GetArticleByID(ctx context.Context, id int64) (*domain.Article, error) {
@@ -116,11 +137,12 @@ func (r *Repository) GetArticleByID(ctx context.Context, id int64) (*domain.Arti
 
 func (r *Repository) UpdateArticle(ctx context.Context, article domain.Article, tags []domain.Tag) error {
 	Article := models.Article{
-		Title:      article.Title,
-		Slug:       article.Slug,
-		Body:       article.Body,
-		Status:     string(article.Status),
-		CategoryID: article.CategoryID,
+		Title:       article.Title,
+		Slug:        article.Slug,
+		Body:        article.Body,
+		Status:      string(article.Status),
+		CategoryID:  article.CategoryID,
+		PublishedAt: article.PublishedAt,
 	}
 
 	res := r.db.WithContext(ctx).Model(&models.Article{}).Where("id = ?", article.ID).Where("user_id = ?", ctx.Value("userID")).Updates(Article)

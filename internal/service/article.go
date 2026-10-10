@@ -21,6 +21,7 @@ type ArticleRepository interface {
 	DeleteComment(ctx context.Context, commentId int64) error
 	AddView(ctx context.Context, articleID int64, views int) error
 	GetArticleListByTitle(ctx context.Context, title string) (*[]domain.Article, error)
+	PublishArticle(ctx context.Context) error
 }
 
 type ArticleService struct {
@@ -129,4 +130,8 @@ func (s *ArticleService) GetArticleListByTitle(ctx context.Context, title string
 	}
 
 	return articles, nil
+}
+
+func (s *ArticleService) PublishArticle(ctx context.Context) error {
+	return s.repo.PublishArticle(ctx)
 }
