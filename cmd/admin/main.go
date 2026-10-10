@@ -49,9 +49,39 @@ func main() {
 	articleService := loadArticleService(repository)
 	commentService := loadCommentService(repository)
 
+	//article publish service
+	publishDone := make(chan struct{})
+	go func() {
+		ticker := time.NewTicker(15 * time.Minute)
+		defer ticker.Stop()
+		defer close(publishDone)
+
+		for {
+			select {
+			case <-ticker.C:
+				err := articleService.PublishArticle(context.Background())
+				if err != nil {
+					slog.Error("Error publishing articles:", "error", err)
+				}
+			case <-publishDone:
+				err := articleService.PublishArticle(context.Background())
+				if err != nil {
+					slog.Error("Error publishing articles:", "error", err)
+				}
+				return
+			}
+		}
+
+	}()
+
 	//channel handels the views count
+	workerDone := make(chan struct{})
 	Views := make(chan int, 1000)
-	go worker(Views, articleService)
+
+	go func() {
+		defer close(workerDone) // runs when this goroutine exits
+		worker(Views, articleService)
+	}()
 
 	handler := handlers.NewHandler(
 		Views,
@@ -67,9 +97,9 @@ func main() {
 
 	done := make(chan struct{})
 
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 	go func() {
-		sigChan := make(chan os.Signal, 1)
-		signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 		<-sigChan
 
 		fmt.Println("Shutdown signal received, finishing in-flight requests...")
@@ -79,6 +109,10 @@ func main() {
 
 		if err := server.Shutdown(ctx); err != nil {
 			fmt.Printf("Shutdown error: %v\n", err)
+		} else {
+			close(Views)
+			close(publishDone)
+			<-workerDone
 		}
 
 		close(done)
@@ -88,6 +122,7 @@ func main() {
 
 	if err := server.ListenAndServe(); err != http.ErrServerClosed {
 		fmt.Printf("Server error: %v\n", err)
+		sigChan <- syscall.SIGTERM
 	}
 
 	<-done
@@ -102,7 +137,12 @@ func worker(ch <-chan int, articleService *service.ArticleService) {
 		select {
 		case id, ok := <-ch:
 			if !ok {
-				// Channel was closed
+				if len(IdsList) > 0 {
+					for id, views := range IdsList {
+						articleService.AddView(context.Background(), int64(id), views)
+					}
+					IdsList = make(map[int]int)
+				}
 				return
 			}
 			if IdsList[id] != 0 {

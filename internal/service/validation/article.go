@@ -17,8 +17,16 @@ func NewArticleValidator() *ArticleValidator {
 func (v *ArticleValidator) Validate(article *domain.Article) error {
 	err1 := v.validateTitle(article.Title)
 	err2 := v.validateBody(article.Body)
+	err3 := v.validatePublishedAt(article)
 
-	return errors.Join(err1, err2)
+	return errors.Join(err1, err2, err3)
+}
+
+func (v *ArticleValidator) validatePublishedAt(article *domain.Article) error {
+	if article.Status == domain.ArticleStatusScheduled && article.PublishedAt.IsZero() {
+		return fmt.Errorf("%w published at field is required", Validation)
+	}
+	return nil
 }
 
 func (v *ArticleValidator) validateTitle(name string) error {

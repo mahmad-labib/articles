@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/jwtauth/v5"
@@ -13,11 +14,12 @@ import (
 )
 
 type ArticleCreation struct {
-	Tags       []int  `json:"tags"`
-	CategoryID int    `json:"categoryId"`
-	Title      string `json:"title"`
-	Body       string `json:"body"`
-	Status     string `json:"status"`
+	Tags        []int     `json:"tags"`
+	CategoryID  int       `json:"categoryId"`
+	Title       string    `json:"title"`
+	Body        string    `json:"body"`
+	Status      string    `json:"status"`
+	PublishedAt time.Time `json:"publishedAt"`
 }
 
 func (h *Handler) CreateArticle(w http.ResponseWriter, r *http.Request) {
@@ -54,11 +56,12 @@ func (h *Handler) CreateArticle(w http.ResponseWriter, r *http.Request) {
 	}
 
 	article := domain.Article{
-		Title:      body.Title,
-		Body:       body.Body,
-		Status:     status,
-		CategoryID: int64(body.CategoryID),
-		AuthorID:   userID,
+		Title:       body.Title,
+		Body:        body.Body,
+		Status:      status,
+		CategoryID:  int64(body.CategoryID),
+		AuthorID:    userID,
+		PublishedAt: body.PublishedAt,
 	}
 
 	tags := make([]domain.Tag, len(body.Tags))
