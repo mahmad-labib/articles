@@ -203,7 +203,7 @@ func (h *Handler) GetArticleByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.views <- int(Article.ID)
+	h.views.Submit(int64(Article.ID))
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
