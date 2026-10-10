@@ -56,35 +56,23 @@ func main() {
 		defer ticker.Stop()
 		defer close(publishDone)
 
-		for {
-			select {
-			case <-ticker.C:
-				err := articleService.PublishArticle(context.Background())
-				if err != nil {
-					slog.Error("Error publishing articles:", "error", err)
-				}
-			case <-publishDone:
-				err := articleService.PublishArticle(context.Background())
-				if err != nil {
-					slog.Error("Error publishing articles:", "error", err)
-				}
-				return
-			}
-		}
-
+		publishWorker(ticker, publishDone, articleService)
 	}()
 
 	//channel handels the views count
-	workerDone := make(chan struct{})
-	Views := make(chan int, 1000)
+	viewCounter := service.NewBatchCounter[int64](1000, 5*time.Second, func(counts map[int64]int) error {
+		for id, views := range counts {
+			if err := articleService.AddView(context.Background(), id, views); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 
-	go func() {
-		defer close(workerDone) // runs when this goroutine exits
-		worker(Views, articleService)
-	}()
+	go viewCounter.Run()
 
 	handler := handlers.NewHandler(
-		Views,
+		viewCounter,
 		jwt,
 		userService,
 		tagService,
@@ -110,9 +98,8 @@ func main() {
 		if err := server.Shutdown(ctx); err != nil {
 			fmt.Printf("Shutdown error: %v\n", err)
 		} else {
-			close(Views)
 			close(publishDone)
-			<-workerDone
+			<-viewCounter.Close()
 		}
 
 		close(done)
@@ -131,32 +118,20 @@ func main() {
 
 var ticker = time.NewTicker(5000 * time.Millisecond)
 
-func worker(ch <-chan int, articleService *service.ArticleService) {
-	var IdsList = make(map[int]int)
+func publishWorker(ticker *time.Ticker, done chan struct{}, articleService *service.ArticleService) {
 	for {
 		select {
-		case id, ok := <-ch:
-			if !ok {
-				if len(IdsList) > 0 {
-					for id, views := range IdsList {
-						articleService.AddView(context.Background(), int64(id), views)
-					}
-					IdsList = make(map[int]int)
-				}
-				return
-			}
-			if IdsList[id] != 0 {
-				IdsList[id] = IdsList[id] + 1
-			} else {
-				IdsList[id] = 1
-			}
 		case <-ticker.C:
-			if len(IdsList) > 0 {
-				for id, views := range IdsList {
-					articleService.AddView(context.Background(), int64(id), views)
-				}
-				IdsList = make(map[int]int)
+			err := articleService.PublishArticle(context.Background())
+			if err != nil {
+				slog.Error("Error publishing articles:", "error", err)
 			}
+		case <-done:
+			err := articleService.PublishArticle(context.Background())
+			if err != nil {
+				slog.Error("Error publishing articles:", "error", err)
+			}
+			return
 		}
 	}
 }

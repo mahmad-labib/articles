@@ -6,6 +6,7 @@ import (
 	"github.com/go-chi/jwtauth/v5"
 	"github.com/mahmad-labib/articles/internal/domain"
 	"github.com/mahmad-labib/articles/internal/infra/db"
+	"github.com/mahmad-labib/articles/internal/service"
 )
 
 type UserService interface {
@@ -50,7 +51,7 @@ type CommentService interface {
 }
 
 type Handler struct {
-	views chan<- int
+	views *service.BatchCounter[int64]
 	jwt   *jwtauth.JWTAuth
 	usvc  UserService
 	tsvc  TagService
@@ -60,7 +61,7 @@ type Handler struct {
 }
 
 func NewHandler(
-	views chan<- int,
+	views *service.BatchCounter[int64],
 	jwt *jwtauth.JWTAuth,
 	usvc UserService,
 	tsvc TagService,
